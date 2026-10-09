@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { localDate } from './model';
 import type { Locale } from './i18n';
@@ -121,10 +121,22 @@ export function Tracker({ client, userId, preview, locale }: { readonly client: 
 }
 
 function HabitProgress({ count, target, korean }: { readonly count: number; readonly target: number; readonly korean: boolean }) {
-  const cells = Math.min(target, 12);
-  const filled = Math.min(cells, Math.ceil((Math.min(count, target) / target) * cells));
-  const label = count >= target ? (korean ? '이번 목표 달성' : 'Goal met') : (korean ? String(target - count) + '번 더' : String(target - count) + ' more');
-  return <div className="habit-progress" aria-label={korean ? '목표 ' + target + '회 중 ' + count + '회 완료' : String(count) + ' of ' + target + ' completed'}><div className="progress-beads" aria-hidden="true">{Array.from({ length: cells }, (_, index) => <i className={index < filled ? 'filled' : ''} key={index} />)}</div><span>{label}</span></div>;
+  const clipId = 'apple-clip-' + useId().replace(/:/g, '');
+  const slices = Math.min(target, 8);
+  const filled = Math.min(slices, Math.ceil((Math.min(count, target) / target) * slices));
+  const sliceHeight = 44 / slices;
+  const label = count >= target ? (korean ? '사과 완성!' : 'Apple complete!') : (korean ? String(target - count) + '조각 더' : String(target - count) + ' slices left');
+  return <div className="habit-progress" aria-label={korean ? '사과 목표 ' + target + '조각 중 ' + count + '조각 완료' : String(count) + ' of ' + target + ' apple slices completed'}>
+    <svg className="apple-progress" viewBox="0 0 64 72" aria-hidden="true">
+      <defs><clipPath id={clipId}><path d="M32 18C19 11 7 19 7 36c0 17 11 26 25 26s25-9 25-26C57 19 45 11 32 18Z" /></clipPath></defs>
+      <path className="apple-base" d="M32 18C19 11 7 19 7 36c0 17 11 26 25 26s25-9 25-26C57 19 45 11 32 18Z" />
+      <g clipPath={'url(#' + clipId + ')'}>{Array.from({ length: slices }, (_, index) => <rect className={index < filled ? 'apple-slice filled' : 'apple-slice'} key={index} x="5" y={61 - (index + 1) * sliceHeight} width="54" height={sliceHeight - .7} />)}</g>
+      <path className="apple-outline" d="M32 18C19 11 7 19 7 36c0 17 11 26 25 26s25-9 25-26C57 19 45 11 32 18Z" />
+      <path className="apple-leaf" d="M33 16c5-10 14-10 18-8-3 8-10 11-18 8Z" />
+      <path className="apple-stem" d="M32 17c0-6 2-9 5-11" />
+    </svg>
+    <span>{label}</span>
+  </div>;
 }
 function dayCount(checks: HabitCheck[], habitId: string, day: string): number { return checks.find(item => item.habit_id === habitId && item.completed_on === day)?.count ?? 0; }
 function periodStart(date: string, habit: Habit): string { if (habit.cadence === 'month') return `${date.slice(0, 7)}-01`; const value = new Date(`${date}T12:00:00`); value.setDate(value.getDate() - ((value.getDay() - habit.week_starts_on + 7) % 7)); return localDate(value); }
