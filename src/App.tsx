@@ -86,12 +86,15 @@ type JournalProps = {
   readonly repository: Repository;
   readonly onExit: () => Promise<void>;
 };
+type View = 'today' | 'history' | 'calendar' | 'tracker' | 'my';
+const routeToView: Record<string, View> = { '#today': 'today', '#entries': 'history', '#calendar': 'calendar', '#plans': 'tracker', '#me': 'my' };
+const viewToRoute: Record<View, string> = { today: '#today', history: '#entries', calendar: '#calendar', tracker: '#plans', my: '#me' };
 
 function Journal({ locale, onLocale, userId, email, preview, repository, onExit }: JournalProps) {
   const t = messages[locale];
   const store = useMemo(() => new JournalStore(repository, userId, localStorage), [repository, userId]);
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
-  const [view, setView] = useState<'today' | 'history' | 'calendar' | 'tracker' | 'my'>('today');
+  const [view, setView] = useState<View>(() => routeToView[window.location.hash] ?? 'today');
   const [mode, setMode] = useState<'timeline' | 'editor'>('timeline');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -118,6 +121,12 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
       window.removeEventListener('focus', resume); window.removeEventListener('beforeunload', unload);
     };
   }, [store]);
+  useEffect(() => {
+    const syncRoute = () => setView(routeToView[window.location.hash] ?? 'today');
+    window.addEventListener('hashchange', syncRoute);
+    if (!window.location.hash) window.history.replaceState(null, '', '#today');
+    return () => window.removeEventListener('hashchange', syncRoute);
+  }, []);
 
   const entries = [...state.entries].sort((a, b) => b.entry_date.localeCompare(a.entry_date) || b.created_at.localeCompare(a.created_at));
   const visible = entries.filter(e => view === 'history' || e.entry_date === today);
@@ -127,6 +136,7 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   const days = weekDays(today, locale);
 
   function create() { setSelectedId(store.add()); setView('today'); setMode('editor'); }
+  function navigate(next: View) { window.location.hash = viewToRoute[next]; }
   function openEntry(id: string) { setSelectedId(id); setMode('editor'); }
   async function exit() {
     if (state.pending > 0) { setNotice(t.leave); return; }
@@ -154,14 +164,14 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   return <div className="journal-app timeline-workspace">
     {notices}<header className="journal-topbar"><Brand /><button className="icon-button" aria-label={t.settings} onClick={() => setSettingsOpen(true)}><Sliders /></button></header>
     <main className="timeline-page">{state.loadError ? <section className="empty"><h1>{t.loadError}</h1><button className="primary" onClick={() => { void store.load(); }}>{t.retry}</button></section>
-      : !state.loaded ? <p className="loading" role="status">{t.loading}</p> : view === 'my' ? <MySpace client={preview ? null : supabase} email={email} locale={locale} onPlans={() => setView('tracker')} onSettings={() => setSettingsOpen(true)} /> : view === 'tracker' ? <Tracker client={preview ? null : supabase} userId={userId} preview={preview} locale={locale} /> : view === 'calendar' ? <><section className="calendar-heading"><p>{t.calendar}</p><div><button className="month-button previous" aria-label="Previous month" onClick={() => setMonth(value => shiftMonth(value, -1))}><Chevron /></button><h1>{formatMonth(month, locale)}</h1><button className="month-button" aria-label="Next month" onClick={() => setMonth(value => shiftMonth(value, 1))}><Chevron /></button></div></section>
+      : !state.loaded ? <p className="loading" role="status">{t.loading}</p> : view === 'my' ? <MySpace client={preview ? null : supabase} email={email} locale={locale} onPlans={() => navigate('tracker')} onSettings={() => setSettingsOpen(true)} /> : view === 'tracker' ? <Tracker client={preview ? null : supabase} userId={userId} preview={preview} locale={locale} /> : view === 'calendar' ? <><section className="calendar-heading"><p>{t.calendar}</p><div><button className="month-button previous" aria-label="Previous month" onClick={() => setMonth(value => shiftMonth(value, -1))}><Chevron /></button><h1>{formatMonth(month, locale)}</h1><button className="month-button" aria-label="Next month" onClick={() => setMonth(value => shiftMonth(value, 1))}><Chevron /></button></div></section>
         <section className="calendar-grid" aria-label={formatMonth(month, locale)}>{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => <span className="calendar-weekday" key={`${day}-${index}`}>{day}</span>)}{monthDays(month).map(day => { const hasEntries = entries.some(entry => entry.entry_date === day.value); return <button key={day.value} className={`calendar-day ${day.inMonth ? '' : 'outside'} ${day.value === today ? 'selected' : ''} ${hasEntries ? 'has-entry' : ''}`} aria-label={formatDate(day.value, locale)} onClick={() => { setToday(day.value); setView('today'); }}><span>{day.day}</span>{hasEntries && <i aria-hidden="true" />}</button>; })}</section>
         <section className="calendar-note"><p>{locale === 'ko' ? '날짜를 누르면 그날의 기록을 볼 수 있어요.' : 'Choose a date to read what you wrote that day.'}</p></section></> : <><section className="day-hero"><p>{view === 'today' ? t.todayLabel : t.history}</p><h1>{view === 'today' ? formatDate(today, locale) : t.history}</h1><span>{view === 'today' ? t.todayPrompt : `${entries.length} ${locale === 'en' && entries.length === 1 ? 'entry' : t.entryCount}`}</span></section>
         {view === 'today' && <nav className="week-strip" aria-label={locale === 'ko' ? '이번 주' : 'This week'}>{days.map(day => <button key={day.value} className={day.value === today ? 'week-day active' : 'week-day'} onClick={() => { setToday(day.value); }}><span>{day.label}</span><strong>{day.day}</strong></button>)}</nav>}
         {visible.length ? <section className="entry-feed" aria-label={t.history}>{visible.map(entry => <button className="entry-card" key={entry.id} onClick={() => openEntry(entry.id)}><span className="entry-card-date">{formatDate(entry.entry_date, locale)}</span><h2>{entry.title || entry.body.split('\n')[0]?.slice(0, 70) || t.untitled}</h2><p>{entry.body || t.todayPrompt}</p><small>{state.status[entry.id] === 'error' || state.status[entry.id] === 'conflict' ? '!' : new Intl.DateTimeFormat(locale === 'ko' ? 'ko-KR' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(entry.updated_at))}</small></button>)}</section>
           : <section className="empty timeline-empty"><div className="empty-mark" aria-hidden="true">—</div><h2>{view === 'today' ? t.noToday : t.empty}</h2><p>{view === 'today' ? t.noTodayHelp : t.emptyHelp}</p></section>}</>}
     </main>
-    <button className="compose-button" disabled={!state.loaded} onClick={create}><Plus />{t.newEntry}</button><nav className="bottom-nav" aria-label={locale === 'ko' ? '기록 탐색' : 'Journal navigation'}><button className={view === 'today' ? 'active' : ''} onClick={() => setView('today')}><span><Book /></span>{t.today}</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}><span><Book /></span>{t.history}</button><button className={view === 'calendar' ? 'active' : ''} onClick={() => { setMonth(today.slice(0, 7)); setView('calendar'); }}><span><Calendar /></span>{t.calendar}</button><button className={view === 'tracker' ? 'active' : ''} onClick={() => setView('tracker')}><span><CheckSquare /></span>{locale === 'ko' ? '계획' : 'Plans'}</button><button className={view === 'my' ? 'active' : ''} onClick={() => setView('my')}><span><Person /></span>{locale === 'ko' ? '내 공간' : 'Me'}</button></nav>{settings}
+    <button className="compose-button" disabled={!state.loaded} onClick={create}><Plus />{t.newEntry}</button><nav className="bottom-nav" aria-label={locale === 'ko' ? '기록 탐색' : 'Journal navigation'}><button className={view === 'today' ? 'active' : ''} onClick={() => navigate('today')}><span><Book /></span>{t.today}</button><button className={view === 'history' ? 'active' : ''} onClick={() => navigate('history')}><span><Book /></span>{t.history}</button><button className={view === 'calendar' ? 'active' : ''} onClick={() => { setMonth(today.slice(0, 7)); navigate('calendar'); }}><span><Calendar /></span>{t.calendar}</button><button className={view === 'tracker' ? 'active' : ''} onClick={() => navigate('tracker')}><span><CheckSquare /></span>{locale === 'ko' ? '계획' : 'Plans'}</button><button className={view === 'my' ? 'active' : ''} onClick={() => navigate('my')}><span><Person /></span>{locale === 'ko' ? '내 공간' : 'Me'}</button></nav>{settings}
   </div>;
 }
 
@@ -228,6 +238,7 @@ export function App() {
       {!supabase && <p className="setup">{t.setup}</p>}
       {authError && <p className="alert" role="alert">{t.authError}</p>}
       {!supabase && <button className="quiet preview-link" onClick={() => setPreview(true)}>{t.preview}<span aria-hidden="true"> →</span></button>}
+      <section className="landing-story"><div><p className="eyebrow">WRITE · NOTICE · ACT</p><h2>{locale === 'ko' ? '기록이 다음 행동으로 이어지도록.' : 'Let a note become your next step.'}</h2><p>{locale === 'ko' ? '일기를 쓰고, 해야 할 일을 꺼내고, 반복하고 싶은 일을 목표로 남깁니다.' : 'Write what happened, keep the next action, and return to what matters.'}</p></div><div className="landing-grid"><article><strong>{locale === 'ko' ? '기록과 회고' : 'Journal and review'}</strong><span>{locale === 'ko' ? '날짜·달력·주간 회고' : 'Dates, calendar, weekly reflection'}</span></article><article><strong>{locale === 'ko' ? '행동과 습관' : 'Actions and habits'}</strong><span>{locale === 'ko' ? '인박스·보관함·주간/월간 목표' : 'Inbox, archive, weekly/monthly goals'}</span></article></div><div className="coming-soon"><p className="eyebrow">COMING SOON</p><h3>{locale === 'ko' ? '원할 때만 켜는 개인 비서.' : 'A private assistant, only when you ask.'}</h3><ul><li>{locale === 'ko' ? '일기에서 액션 후보를 제안하는 AI 정리' : 'AI suggestions for action candidates'}</li><li>{locale === 'ko' ? '이메일·브라우저 알림과 리마인더 시간 설정' : 'Email, browser notifications, and reminder times'}</li><li>{locale === 'ko' ? '내 기록을 기반으로 묻는 대화형 회고' : 'Conversational reflection over your own records'}</li><li>{locale === 'ko' ? '개발자를 위한 MCP 연결' : 'MCP connection for developers'}</li></ul></div></section>
     </main><footer className="welcome-footer">{t.footer}</footer>
   </div>;
 }
