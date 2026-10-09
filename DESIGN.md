@@ -44,3 +44,19 @@ feedback for press and view transitions, disabled under reduced motion. Use
 semantic landmarks, form labels and a polite saving status. Persist drafts per signed-in user.
 Initial preview explicitly labels device-only sample mode; it is never reported
 as cloud storage. Authentication and database checks need a personal project.
+
+## October polish: a personal progress notebook
+Retain the five destinations and the Korean school reward-chart apple motif.
+Use a warm ivory canvas (#f8f6f1), white paper, charcoal ink (#303632),
+forest accent (#426653), muted ink (#69716a), and neutral borders (#e3e4dc).
+Dark mode uses #191f1d canvas, #232c27 paper, #b4d3bb accent and #b1bcb3 muted ink.
+Apple red is #c84939 in light mode and #ffb0a0 in dark mode for readable labels.
+Headings: 32–40px serif; body 16px; labels 12–14px. Controls at least 44px.
+Use 24px card padding, 16px gaps, 20px corners, a quiet paper shadow.
+The document owns scroll. Navigation spans five equal columns on phones, with
+safe-area padding and reserved page space. Desktop navigation stays centered.
+Plans: a factual summary, a compact action form, collapsible labelled habit
+creation, apple progress cards and explicitly labelled today steppers.
+History affordances are visible. No new libraries or decorative animation.
+Accepted debt: older CSS declarations remain until a dedicated cleanup; scoped
+polish rules provide the final shared tokens and responsive behavior.
