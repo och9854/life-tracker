@@ -23,10 +23,23 @@ The product should feel like a quiet personal notebook that visibly collects sma
 | Reminder | Mailbox |
 | Gentle reset | Cloud |
 
+## Korean retro reward sheet
+
+[`korean-retro-reward-stickers-v2.png`](public/assets/korean-retro-reward-stickers-v2.png) is the primary direction for the app. It uses the flat, glossy, thick-outlined visual language of Korean piano-academy and elementary-school reward stickers.
+
+| Habit feedback | Asset |
+| --- | --- |
+| Empty to half-way progress | Half-colored apple |
+| Individual completion | Grape dots |
+| Period completion | Grape bunch |
+| Strong milestone | Crown, star, trophy |
+| Practice and focus | Musical note, keyboard, pencil |
+| Gentle check-in | Smiling sun, cloud, heart |
+
 ## Use rules
 
-- Show one sticker per section or milestone, at 32–72 px. The full sheet is a source asset and should not be shown in the app.
-- Use the grape cluster for weekly or monthly completion moments, after the user reaches a meaningful fraction of their target.
+- Use the Korean retro reward sheet for the product UI. Show one sticker per section or milestone, at 32–72 px. The full sheet is a source asset and should not be shown in the app.
+- Use grape dots for live counts and the grape cluster for weekly or monthly completion moments.
 - Use small CSS progress beads for live counts; reserve richer stickers for completion and review states.
 - Keep the existing dark, quiet surface. Stickers supply the warm cream, sage, grape, and coral accents.
 - Avoid repeated celebratory animation. A completed target may receive a single subtle scale or glow response.
