@@ -7,6 +7,7 @@ import { localDate, markdown } from './model';
 import { cloudRepository, previewRepository, supabase } from './repository';
 import type { Repository } from './model';
 import { Tracker } from './tracker';
+import { MySpace } from './my-space';
 
 function download(text: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
@@ -36,6 +37,7 @@ function Sliders() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d=
 function Book() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17.5H7.5A2.5 2.5 0 0 0 5 22V4.5Zm0 0V19.5" /></svg>; }
 function Calendar() { return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></svg>; }
 function CheckSquare() { return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8 12 2.5 2.5L16 9" /></svg>; }
+function Person() { return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M4.5 21c.8-3.6 3.2-5.5 7.5-5.5s6.7 1.9 7.5 5.5" /></svg>; }
 function Chevron() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>; }
 
 function weekDays(today: string, locale: Locale) {
@@ -89,7 +91,7 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   const t = messages[locale];
   const store = useMemo(() => new JournalStore(repository, userId, localStorage), [repository, userId]);
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
-  const [view, setView] = useState<'today' | 'history' | 'calendar' | 'tracker'>('today');
+  const [view, setView] = useState<'today' | 'history' | 'calendar' | 'tracker' | 'my'>('today');
   const [mode, setMode] = useState<'timeline' | 'editor'>('timeline');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -152,14 +154,14 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   return <div className="journal-app timeline-workspace">
     {notices}<header className="journal-topbar"><Brand /><button className="icon-button" aria-label={t.settings} onClick={() => setSettingsOpen(true)}><Sliders /></button></header>
     <main className="timeline-page">{state.loadError ? <section className="empty"><h1>{t.loadError}</h1><button className="primary" onClick={() => { void store.load(); }}>{t.retry}</button></section>
-      : !state.loaded ? <p className="loading" role="status">{t.loading}</p> : view === 'tracker' ? <Tracker client={preview ? null : supabase} userId={userId} preview={preview} locale={locale} /> : view === 'calendar' ? <><section className="calendar-heading"><p>{t.calendar}</p><div><button className="month-button previous" aria-label="Previous month" onClick={() => setMonth(value => shiftMonth(value, -1))}><Chevron /></button><h1>{formatMonth(month, locale)}</h1><button className="month-button" aria-label="Next month" onClick={() => setMonth(value => shiftMonth(value, 1))}><Chevron /></button></div></section>
+      : !state.loaded ? <p className="loading" role="status">{t.loading}</p> : view === 'my' ? <MySpace client={preview ? null : supabase} email={email} locale={locale} onPlans={() => setView('tracker')} onSettings={() => setSettingsOpen(true)} /> : view === 'tracker' ? <Tracker client={preview ? null : supabase} userId={userId} preview={preview} locale={locale} /> : view === 'calendar' ? <><section className="calendar-heading"><p>{t.calendar}</p><div><button className="month-button previous" aria-label="Previous month" onClick={() => setMonth(value => shiftMonth(value, -1))}><Chevron /></button><h1>{formatMonth(month, locale)}</h1><button className="month-button" aria-label="Next month" onClick={() => setMonth(value => shiftMonth(value, 1))}><Chevron /></button></div></section>
         <section className="calendar-grid" aria-label={formatMonth(month, locale)}>{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => <span className="calendar-weekday" key={`${day}-${index}`}>{day}</span>)}{monthDays(month).map(day => { const hasEntries = entries.some(entry => entry.entry_date === day.value); return <button key={day.value} className={`calendar-day ${day.inMonth ? '' : 'outside'} ${day.value === today ? 'selected' : ''} ${hasEntries ? 'has-entry' : ''}`} aria-label={formatDate(day.value, locale)} onClick={() => { setToday(day.value); setView('today'); }}><span>{day.day}</span>{hasEntries && <i aria-hidden="true" />}</button>; })}</section>
         <section className="calendar-note"><p>{locale === 'ko' ? '날짜를 누르면 그날의 기록을 볼 수 있어요.' : 'Choose a date to read what you wrote that day.'}</p></section></> : <><section className="day-hero"><p>{view === 'today' ? t.todayLabel : t.history}</p><h1>{view === 'today' ? formatDate(today, locale) : t.history}</h1><span>{view === 'today' ? t.todayPrompt : `${entries.length} ${locale === 'en' && entries.length === 1 ? 'entry' : t.entryCount}`}</span></section>
         {view === 'today' && <nav className="week-strip" aria-label={locale === 'ko' ? '이번 주' : 'This week'}>{days.map(day => <button key={day.value} className={day.value === today ? 'week-day active' : 'week-day'} onClick={() => { setToday(day.value); }}><span>{day.label}</span><strong>{day.day}</strong></button>)}</nav>}
         {visible.length ? <section className="entry-feed" aria-label={t.history}>{visible.map(entry => <button className="entry-card" key={entry.id} onClick={() => openEntry(entry.id)}><span className="entry-card-date">{formatDate(entry.entry_date, locale)}</span><h2>{entry.title || entry.body.split('\n')[0]?.slice(0, 70) || t.untitled}</h2><p>{entry.body || t.todayPrompt}</p><small>{state.status[entry.id] === 'error' || state.status[entry.id] === 'conflict' ? '!' : new Intl.DateTimeFormat(locale === 'ko' ? 'ko-KR' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(entry.updated_at))}</small></button>)}</section>
           : <section className="empty timeline-empty"><div className="empty-mark" aria-hidden="true">—</div><h2>{view === 'today' ? t.noToday : t.empty}</h2><p>{view === 'today' ? t.noTodayHelp : t.emptyHelp}</p></section>}</>}
     </main>
-    <button className="compose-button" disabled={!state.loaded} onClick={create}><Plus />{t.newEntry}</button><nav className="bottom-nav" aria-label={locale === 'ko' ? '기록 탐색' : 'Journal navigation'}><button className={view === 'today' ? 'active' : ''} onClick={() => setView('today')}><span><Book /></span>{t.today}</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}><span><Book /></span>{t.history}</button><button className={view === 'calendar' ? 'active' : ''} onClick={() => { setMonth(today.slice(0, 7)); setView('calendar'); }}><span><Calendar /></span>{t.calendar}</button><button className={view === 'tracker' ? 'active' : ''} onClick={() => setView('tracker')}><span><CheckSquare /></span>{locale === 'ko' ? '계획' : 'Plans'}</button></nav>{settings}
+    <button className="compose-button" disabled={!state.loaded} onClick={create}><Plus />{t.newEntry}</button><nav className="bottom-nav" aria-label={locale === 'ko' ? '기록 탐색' : 'Journal navigation'}><button className={view === 'today' ? 'active' : ''} onClick={() => setView('today')}><span><Book /></span>{t.today}</button><button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}><span><Book /></span>{t.history}</button><button className={view === 'calendar' ? 'active' : ''} onClick={() => { setMonth(today.slice(0, 7)); setView('calendar'); }}><span><Calendar /></span>{t.calendar}</button><button className={view === 'tracker' ? 'active' : ''} onClick={() => setView('tracker')}><span><CheckSquare /></span>{locale === 'ko' ? '계획' : 'Plans'}</button><button className={view === 'my' ? 'active' : ''} onClick={() => setView('my')}><span><Person /></span>{locale === 'ko' ? '내 공간' : 'Me'}</button></nav>{settings}
   </div>;
 }
 
