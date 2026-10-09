@@ -60,3 +60,14 @@ creation, apple progress cards and explicitly labelled today steppers.
 History affordances are visible. No new libraries or decorative animation.
 Accepted debt: older CSS declarations remain until a dedicated cleanup; scoped
 polish rules provide the final shared tokens and responsive behavior.
+
+## Landing / welcome
+An editorial cream-paper landing page with forest typography and apple-red
+highlights, distinct from the app's system-aware dark mode. Desktop hero uses
+two columns: a 56px headline and a notebook demonstration. Mobile stacks both.
+Maximum width 1120px, section spacing 80px, body 16px/1.8, cards 24px padding.
+Use the real apple progress primitive for a clearly labelled interactive sample.
+Sections: hero and Google CTA, three-step product explanation, interactive
+habit preview, clearly unavailable roadmap, FAQ, closing CTA. English/Korean.
+No fabricated testimonials, usage numbers, pricing or available AI claims.
+Anchor #welcome is accessible with or without an authenticated session.
