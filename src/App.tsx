@@ -177,8 +177,13 @@ export function App() {
   useEffect(() => {
     if (!supabase) return;
     let active = true;
+    const oauthError = new URLSearchParams(window.location.search).get('error');
+    if (oauthError) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setAuthError(true);
+    }
     void supabase.auth.getSession().then(({ data, error }) => {
-      if (active) { setUser(data.session?.user ?? null); setAuthError(Boolean(error)); setLoading(false); }
+      if (active) { setUser(data.session?.user ?? null); setAuthError(Boolean(error) || Boolean(oauthError)); setLoading(false); }
     }).catch(() => { if (active) { setAuthError(true); setLoading(false); } });
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null); setLoading(false);
