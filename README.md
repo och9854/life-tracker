@@ -37,8 +37,11 @@ and was not modified. No remote project was created or linked.
 
 ## Deploy
 
-`pnpm build` produces `dist/`, suitable for an HTTPS static host. Configure the
-same public environment values at build time. All navigation stays on `/`.
+`pnpm build` produces `dist/`, suitable for an HTTPS static host. The checked-in
+`.env.production` contains only the Supabase URL and publishable key, both of
+which are designed for browser exposure and protected by RLS. Never add an
+OAuth client secret, service-role key, or database password to this file. All
+navigation stays on `/`.
 The manifest supports home-screen installation; this version does not cache the
 app shell offline. Draft recovery is device-local and scoped to the auth user.
 Web push, notifications, AI processing and full offline synchronization are not
