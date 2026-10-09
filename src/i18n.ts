@@ -1,7 +1,7 @@
 export type Locale = 'en' | 'ko';
 export const messages = {
   en: {
-    today: 'Today', history: 'All entries', newEntry: 'New entry', language: 'Language', back: 'Entries', settings: 'Settings', close: 'Close',
+    today: 'Today', history: 'Entries', calendar: 'Calendar', newEntry: 'New entry', save: 'Save', savingNow: 'Saving…', savedNow: 'Saved', language: 'Language', back: 'Entries', settings: 'Settings', close: 'Close',
     todayPrompt: 'Continue with today’s thoughts.', todayLabel: 'Today', writingMeta: 'Only you can read this entry.',
     greeting: 'A little space for your day.', intro: 'Thoughts, ordinary moments, and everything in between. Start wherever you are.',
     google: 'Continue with Google', private: 'Your entries are private. Only you can read them.',
@@ -21,7 +21,7 @@ export const messages = {
     offline: 'You are offline. Keep writing; drafts stay on this device until you reconnect.',
   },
   ko: {
-    today: '오늘', history: '모든 기록', newEntry: '새 기록', language: '언어', back: '기록', settings: '설정', close: '닫기',
+    today: '오늘', history: '기록', calendar: '달력', newEntry: '새 기록', save: '저장', savingNow: '저장 중…', savedNow: '저장됨', language: '언어', back: '기록', settings: '설정', close: '닫기',
     todayPrompt: '오늘의 생각을 이어가세요.', todayLabel: '오늘', writingMeta: '나만 볼 수 있는 기록이에요.',
     greeting: '오늘을 담을 작은 공간.', intro: '떠오른 생각, 평범한 순간, 마음에 남은 일들. 어디서부터든 적어보세요.',
     google: 'Google로 계속하기', private: '기록은 비공개이며 본인만 읽을 수 있어요.',

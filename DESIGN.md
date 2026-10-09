@@ -23,19 +23,24 @@ needed for the initial diary.
 - Shadow: 0 8px 32px rgb(41 45 40 / 0.04).
 
 ## Layout and primitives
-The timeline uses a compact header, a seven-day strip, cards for each entry,
-a fixed compose action, and two bottom navigation choices. The editor owns its
-screen: a back control, save state, date, optional title, and generous writing
-space. Settings live in a bottom sheet with language, export, and account
-controls. The desktop layout keeps the same hierarchy in a 760px reading
-column instead of adding a persistent sidebar. Buttons have text labels, 44px
-minimum touch targets and visible focus rings. States: default, hover, focus,
-disabled, saving, saved, local draft, failure. Empty history keeps the compose
-action available. Errors retain editor text. Language never changes diary text.
+The app separates three destinations: Today for writing, Entries for browsing,
+and Calendar for date-led recall. Today alone owns the week strip; Entries is a
+clean chronological feed; Calendar is its own month grid and opens that day's
+entries. The editor owns its screen: a back control, a labelled Save action,
+date, optional title, and generous writing space. Input is saved immediately as
+a device draft. The Save button writes to the cloud; no typing-driven cloud
+writes occur. Settings live in a bottom sheet with language, export, and
+account controls. The desktop layout keeps the same hierarchy in a 760px
+reading column instead of adding a persistent sidebar. Buttons have text labels,
+44px minimum touch targets and visible focus rings. States: default, hover,
+pressed, disabled, saving, saved, local draft, failure. Empty history keeps the
+compose action available. Errors retain editor text. Language never changes
+diary text.
 
 ## Accessibility and scope
 Support keyboard navigation, 200% zoom, 360px phone width, light/dark system
-preference and reduced motion. No decorative motion. Use semantic landmarks,
-form labels and a polite saving status. Persist drafts per signed-in user.
+preference and reduced motion. Motion is limited to 160ms opacity/transform
+feedback for press and view transitions, disabled under reduced motion. Use
+semantic landmarks, form labels and a polite saving status. Persist drafts per signed-in user.
 Initial preview explicitly labels device-only sample mode; it is never reported
 as cloud storage. Authentication and database checks need a personal project.

@@ -39,6 +39,19 @@ describe('journal persistence', () => {
     expect(markdown(await repository.list())).toContain('한글 and English\n- 기록');
     store.stop();
   });
+  it('keeps edits as a device draft until the user saves', async () => {
+    const storage = new MemoryStorage(); const repository = repo(); const store = new JournalStore(repository, 'a', storage);
+    await store.load();
+    const id = store.add();
+    store.edit(id, { title: 'Later', body: 'Saved locally first', entry_date: localDate() });
+    expect(store.getSnapshot().status[id]).toBe('pending');
+    expect(await repository.list()).toHaveLength(0);
+    expect(storage.getItem('life-journal:drafts:a')).toContain('Saved locally first');
+    await store.flush();
+    expect(store.getSnapshot().status[id]).toBe('saved');
+    expect(await repository.list()).toHaveLength(1);
+    store.stop();
+  });
   it('recovers unsynced drafts after failure and reload', async () => {
     vi.useFakeTimers();
     const storage = new MemoryStorage();

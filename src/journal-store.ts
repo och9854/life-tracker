@@ -15,7 +15,6 @@ export class JournalStore {
   private state: Snapshot = { entries: [], status: {}, loaded: false, loadError: false, storageError: false, pending: 0 };
   private drafts = new Map<string, Draft>();
   private listeners = new Set<() => void>();
-  private timer: ReturnType<typeof setTimeout> | undefined;
   private busy = false;
   private stopped = false;
   private readonly key: string;
@@ -68,7 +67,6 @@ export class JournalStore {
         status[id] = (server?.version ?? 0) === draft.baseVersion ? 'pending' : 'conflict';
       }
       this.publish({ entries: [...merged.values()], status, loaded: true });
-      this.schedule();
     } catch (error) {
       if (this.stopped) return;
       this.publish({ loadError: true });
@@ -88,11 +86,6 @@ export class JournalStore {
     this.publish({ entries: this.state.entries.map(e => e.id === id ? entry : e),
       status: { ...this.state.status, [id]: this.state.status[id] === 'conflict' ? 'conflict' : 'pending' } });
     this.persist();
-    this.schedule();
-  }
-  private schedule(): void {
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => { void this.flush(); }, 650);
   }
   async flush(): Promise<void> {
     if (this.busy || this.stopped || !this.state.loaded) return;
@@ -118,10 +111,7 @@ export class JournalStore {
         }
         this.persist();
       }
-    } finally {
-      this.busy = false;
-      if (!this.stopped && Object.values(this.state.status).includes('pending')) this.schedule();
-    }
+    } finally { this.busy = false; }
   }
   keepAsNew(id: string): string | undefined {
     const draft = this.drafts.get(id);
@@ -131,8 +121,7 @@ export class JournalStore {
     this.drafts.set(entry.id, { entry, baseVersion: 0 });
     this.publish({ entries: [entry, ...this.state.entries.filter(e => e.id !== id)], status: { ...this.state.status, [id]: 'saved', [entry.id]: 'pending' } });
     this.persist();
-    this.schedule();
     return entry.id;
   }
-  stop(): void { this.stopped = true; clearTimeout(this.timer); }
+  stop(): void { this.stopped = true; }
 }
