@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Locale } from './i18n';
 import { HabitProgress } from './tracker';
+import { ThemeSelect } from './theme';
 
 type Props = { locale: Locale; onLocale: (locale: Locale) => void; loading: boolean; signedIn: boolean; canSignIn: boolean; authError: boolean; onStart: () => void; onPreview: () => void };
 export function Landing({ locale, onLocale, loading, signedIn, canSignIn, authError, onStart, onPreview }: Props) {
@@ -9,7 +10,7 @@ export function Landing({ locale, onLocale, loading, signedIn, canSignIn, authEr
   const cta = loading ? (ko ? '잠시만요…' : 'One moment…') : signedIn ? (ko ? '내 기록으로 돌아가기' : 'Open my journal') : (ko ? 'Google로 시작하기' : 'Start with Google');
   const start = <button className="landing-cta" disabled={loading || (!signedIn && !canSignIn)} onClick={onStart}>{cta}<span aria-hidden="true">↗</span></button>;
   return <div className="landing-site" id="welcome">
-    <header className="landing-header"><a href="#welcome" className="landing-brand"><img src="/icon.svg" width="32" height="32" alt="" />Life Journal<span>a little, every day</span></a><div className="landing-header-actions"><a href="#how-it-works">{ko ? '사용 방법' : 'How it works'}</a><label><span className="sr-only">{ko ? '언어' : 'Language'}</span><select value={locale} onChange={event => onLocale(event.target.value as Locale)}><option value="ko">한국어</option><option value="en">English</option></select></label></div></header>
+    <header className="landing-header"><a href="#welcome" className="landing-brand"><img src="/icon.svg" width="32" height="32" alt="" />Life Journal<span>a little, every day</span></a><div className="landing-header-actions"><ThemeSelect locale={locale} /><a href="#how-it-works">{ko ? '사용 방법' : 'How it works'}</a><label><span className="sr-only">{ko ? '언어' : 'Language'}</span><select value={locale} onChange={event => onLocale(event.target.value as Locale)}><option value="ko">한국어</option><option value="en">English</option></select></label></div></header>
     <main>
       <section className="landing-hero landing-wrap">
         <div className="landing-hero-copy"><p className="landing-kicker">YOUR DAYS, TAKING SHAPE</p><h1>{ko ? <>하루를 적고,<br />나를 <em>채워가요.</em></> : <>Write your day.<br /><em>Grow into you.</em></>}</h1><p className="landing-lead">{ko ? '흘려보내기 아쉬운 생각부터, 다시 시작하고 싶은 작은 습관까지. 나의 하루가 차곡차곡 쌓이는 공간.' : 'For thoughts worth keeping and little habits worth returning to. A space to see your days add up.'}</p>{start}<p className="landing-fine">{ko ? '나만 볼 수 있는 기록 · 한국어와 English' : 'Private entries · Korean and English'}</p>{!canSignIn && <button className="landing-text-button" onClick={onPreview}>{ko ? '기록 화면 체험하기 →' : 'Try the journal →'}</button>}{authError && <p role="alert" className="landing-error">{ko ? '로그인이 완료되지 않았어요. 다시 시도해 주세요.' : 'Sign-in did not finish. Please try again.'}</p>}</div>

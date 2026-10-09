@@ -71,3 +71,8 @@ Sections: hero and Google CTA, three-step product explanation, interactive
 habit preview, clearly unavailable roadmap, FAQ, closing CTA. English/Korean.
 No fabricated testimonials, usage numbers, pricing or available AI claims.
 Anchor #welcome is accessible with or without an authenticated session.
+
+## Appearance preference
+Offer System / Light / Dark in journal settings and landing header. Persist the
+choice on this device. System reacts to OS appearance changes; explicit choices
+override OS mode. The root data-theme attribute controls both app and landing.

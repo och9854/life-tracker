@@ -9,6 +9,7 @@ import type { Repository } from './model';
 import { Tracker, useHabitDays } from './tracker';
 import { MySpace } from './my-space';
 import { Landing } from './landing';
+import { ThemeSelect, initializeTheme } from './theme';
 
 function download(text: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
@@ -150,7 +151,8 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   const notices = <>{preview && <div className="banner">{t.previewNote}</div>}{!online && !preview && <div className="banner" role="status">{t.offline}</div>}{state.storageError && <div className="alert" role="alert">{t.draftWarning}</div>}{notice && <div className="alert" role="alert">{notice}</div>}</>;
   const settings = settingsOpen && <><button className="scrim" aria-label={t.close} onClick={() => setSettingsOpen(false)} /><section className="settings-sheet" aria-label={t.settings}>
     <header><div><p className="eyebrow">LIFE JOURNAL</p><h2>{t.settings}</h2></div><button className="icon-button" aria-label={t.close} onClick={() => setSettingsOpen(false)}>×</button></header>
-    <label className="setting-row"><span>{t.language}</span><Language locale={locale} onChange={onLocale} /></label>
+    <div className="setting-row"><span>{t.language}</span><Language locale={locale} onChange={onLocale} /></div>
+    <div className="setting-row"><ThemeSelect locale={locale} /></div>
     <button className="setting-row" disabled={!state.loaded || entries.length === 0} onClick={() => { try { download(markdown(entries)); } catch (error) { if (error instanceof Error) setNotice(t.exportError); else throw error; } }}>{t.export}<span>↓</span></button>
     <div className="settings-account"><span>{preview ? 'Preview' : email}</span><button className="quiet" onClick={() => { void exit(); }}>{preview ? t.exit : t.logout}</button></div>
   </section></>;
@@ -180,6 +182,7 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
 }
 
 export function App() {
+  useEffect(initializeTheme, []);
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(supabase !== null);
