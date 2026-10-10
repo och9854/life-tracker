@@ -20,6 +20,7 @@ export const messages = {
     authError: 'Sign-in did not finish. Please try again.', logoutError: 'Could not sign out. Please try again.', exportError: 'Could not export your entries.',
     offline: 'You are offline. Keep writing; drafts stay on this device until you reconnect.',
     actionFromEntry: 'Turn this into a next step', actionFromEntryHelp: 'Keep one concrete action from this entry in your plans.', actionTitle: 'What will you do next?', actionDue: 'Due date (optional)', addToPlans: 'Add to plans', actionAdded: 'Added to your plans.', actionAddError: 'Could not add this action. Please try again.',
+    aiActionTitle: 'Find next steps with AI', aiActionHelp: 'Only this saved entry is analyzed. Review every suggestion before adding it to your plans.', aiActionButton: 'Find suggestions', aiLoading: 'Looking for next steps…', aiSaveFirst: 'Save this entry before asking AI for suggestions.', aiPreview: 'AI suggestions are available after you sign in.', aiError: 'Suggestions are unavailable right now. Please try again later.', aiEmpty: 'No clear next step found in this entry.', aiCached: 'Showing the suggestions already found for this version.', aiAdded: 'Added to your plans. You can edit it there.', aiSuggestionType: 'Suggestion type', aiActionType: 'Action', aiHabitType: 'Habit',
   },
   ko: {
     today: '오늘', history: '기록', calendar: '달력', newEntry: '새 기록', save: '저장', savingNow: '저장 중…', savedNow: '저장됨', language: '언어', back: '기록', settings: '설정', close: '닫기',
@@ -41,6 +42,7 @@ export const messages = {
     authError: '로그인을 완료하지 못했어요. 다시 시도해 주세요.', logoutError: '로그아웃하지 못했어요. 다시 시도해 주세요.', exportError: '기록을 내보내지 못했어요.',
     offline: '오프라인이에요. 다시 연결될 때까지 초안은 이 기기에 보관돼요.',
     actionFromEntry: '이 기록을 다음 행동으로', actionFromEntryHelp: '이 글에서 이어갈 한 가지를 계획에 남겨보세요.', actionTitle: '다음에 할 일은 무엇인가요?', actionDue: '마감일 (선택)', addToPlans: '계획에 담기', actionAdded: '계획에 담았어요.', actionAddError: '액션을 추가하지 못했어요. 다시 시도해 주세요.',
+    aiActionTitle: 'AI로 다음 행동 찾기', aiActionHelp: '저장된 이 기록 한 편만 분석해요. 계획에 담기 전에 제안을 꼭 확인해 주세요.', aiActionButton: '제안 찾기', aiLoading: '다음 행동을 찾는 중…', aiSaveFirst: '기록을 저장한 뒤 AI 제안을 받아보세요.', aiPreview: 'AI 제안은 로그인 후 사용할 수 있어요.', aiError: '지금은 제안을 불러올 수 없어요. 잠시 후 다시 시도해 주세요.', aiEmpty: '이 기록에서 뚜렷한 다음 행동을 찾지 못했어요.', aiCached: '이 버전의 기록에서 이미 찾은 제안을 보여드려요.', aiAdded: '계획에 담았어요. 계획에서 수정할 수 있어요.', aiSuggestionType: '제안 유형', aiActionType: '액션', aiHabitType: '습관',
   },
 } as const;
 

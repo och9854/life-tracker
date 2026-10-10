@@ -11,6 +11,8 @@ import { MySpace } from './my-space';
 import { Landing } from './landing';
 import { ThemeSelect, initializeTheme } from './theme';
 import { WeeklyReview } from './weekly-review';
+import { actionSuggestionResponseSchema } from './ai';
+import type { ActionSuggestion } from './ai';
 
 function download(text: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
@@ -111,6 +113,8 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   const [nextAction, setNextAction] = useState('');
   const [nextActionDue, setNextActionDue] = useState('');
   const [actionStatus, setActionStatus] = useState('');
+  const [suggestions, setSuggestions] = useState<ActionSuggestion[]>([]);
+  const [aiStatus, setAiStatus] = useState('');
   const habitDays = useHabitDays({ client: preview ? null : supabase, userId, preview, month, active: view === 'calendar' });
 
   useEffect(() => {
@@ -168,6 +172,44 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
       setActionStatus(t.actionAddError);
     }
   }
+  async function findActionCandidates() {
+    if (preview) { setAiStatus(t.aiPreview); return; }
+    if (!selected || !supabase) return;
+    if (status !== 'saved') { setAiStatus(t.aiSaveFirst); return; }
+    setAiStatus(t.aiLoading);
+    setSuggestions([]);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-action-candidates', { body: { entryId: selected.id } });
+      if (error) throw error;
+      const result = actionSuggestionResponseSchema.safeParse(data);
+      if (!result.success) throw new Error('Invalid AI response');
+      setSuggestions(result.data.suggestions);
+      setAiStatus(result.data.suggestions.length ? (result.data.cached ? t.aiCached : '') : t.aiEmpty);
+    } catch (error) {
+      if (!(error instanceof Error)) throw error;
+      setAiStatus(t.aiError);
+    }
+  }
+  function updateSuggestion(id: string, update: Partial<Pick<ActionSuggestion, 'title' | 'type'>>) {
+    setSuggestions(current => current.map(item => item.id === id ? { ...item, ...update } : item));
+  }
+  async function addSuggestionToPlans(suggestion: ActionSuggestion) {
+    if (!selected || preview || !supabase) return;
+    try {
+      if (suggestion.type === 'habit') {
+        const { error } = await supabase.from('habits').insert({ id: crypto.randomUUID(), name: suggestion.title, weekly_target: 1, cadence: 'week', week_starts_on: 1, active: true, source_entry_id: selected.id });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('action_items').insert({ id: crypto.randomUUID(), title: suggestion.title, source_entry_id: selected.id });
+        if (error) throw error;
+      }
+      setSuggestions(current => current.filter(item => item.id !== suggestion.id));
+      setAiStatus(t.aiAdded);
+    } catch (error) {
+      if (!(error instanceof Error)) throw error;
+      setAiStatus(t.actionAddError);
+    }
+  }
   async function exit() {
     if (state.pending > 0) { setNotice(t.leave); return; }
     try { await onExit(); }
@@ -189,7 +231,12 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
       <label className="sr-only" htmlFor="entry-title">{t.title}</label><input id="entry-title" className="editor-title" maxLength={200} placeholder={t.title} value={selected.title} onChange={event => store.edit(selected.id, { title: event.target.value, body: selected.body, entry_date: selected.entry_date })} />
       <label className="sr-only" htmlFor="entry-body">{t.body}</label><textarea id="entry-body" key={selected.id} className="editor-body" maxLength={200000} placeholder={t.placeholder} value={selected.body} onChange={event => store.edit(selected.id, { title: selected.title, body: event.target.value, entry_date: selected.entry_date })} />
       <footer className="editor-footer"><span>{t.writingMeta}</span><span>{Array.from(selected.body).length.toLocaleString(locale)} {t.words}</span></footer>
-      <section className="entry-action-capture" aria-label={t.actionFromEntry}><div><p className="eyebrow">{locale === 'ko' ? '기록에서 실천으로' : 'WRITE → ACT'}</p><h2>{t.actionFromEntry}</h2><p>{t.actionFromEntryHelp}</p></div><div className="entry-action-form"><input aria-label={t.actionTitle} value={nextAction} onChange={event => setNextAction(event.target.value)} placeholder={t.actionTitle} onKeyDown={event => { if (event.key === 'Enter') void addActionFromEntry(); }} /><input type="date" aria-label={t.actionDue} value={nextActionDue} onChange={event => setNextActionDue(event.target.value)} /><button disabled={!nextAction.trim()} onClick={() => { void addActionFromEntry(); }}>{t.addToPlans}</button></div>{actionStatus && <p className="entry-action-status" role="status">{actionStatus}</p>}</section>
+      <section className="entry-action-capture" aria-label={t.actionFromEntry}><div><p className="eyebrow">{locale === 'ko' ? '기록에서 실천으로' : 'WRITE → ACT'}</p><h2>{t.actionFromEntry}</h2><p>{t.actionFromEntryHelp}</p></div><div className="entry-action-form"><input aria-label={t.actionTitle} value={nextAction} onChange={event => setNextAction(event.target.value)} placeholder={t.actionTitle} onKeyDown={event => { if (event.key === 'Enter') void addActionFromEntry(); }} /><input type="date" aria-label={t.actionDue} value={nextActionDue} onChange={event => setNextActionDue(event.target.value)} /><button disabled={!nextAction.trim()} onClick={() => { void addActionFromEntry(); }}>{t.addToPlans}</button></div>{actionStatus && <p className="entry-action-status" role="status">{actionStatus}</p>}
+        <div className="ai-action-divider" />
+        <div className="ai-action-intro"><div><h3>{t.aiActionTitle}</h3><p>{t.aiActionHelp}</p></div><button className="ai-suggest-button" disabled={aiStatus === t.aiLoading} onClick={() => { void findActionCandidates(); }}>{aiStatus === t.aiLoading ? t.aiLoading : t.aiActionButton}</button></div>
+        {aiStatus && <p className="entry-action-status" role="status">{aiStatus}</p>}
+        {suggestions.length > 0 && <div className="ai-suggestion-list">{suggestions.map(suggestion => <article className="ai-suggestion" key={suggestion.id}><p className="ai-suggestion-source">“{suggestion.sourceQuote}”</p><p className="ai-suggestion-reason">{suggestion.reason}</p><div className="ai-suggestion-form"><input aria-label={t.actionTitle} value={suggestion.title} onChange={event => updateSuggestion(suggestion.id, { title: event.target.value })} /><select aria-label={t.aiSuggestionType} value={suggestion.type} onChange={event => updateSuggestion(suggestion.id, { type: event.target.value === 'habit' ? 'habit' : 'action' })}><option value="action">{t.aiActionType}</option><option value="habit">{t.aiHabitType}</option></select><button disabled={!suggestion.title.trim()} onClick={() => { void addSuggestionToPlans(suggestion); }}>{t.addToPlans}</button></div></article>)}</div>}
+      </section>
     </main>{settings}
   </div>;
 

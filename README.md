@@ -66,3 +66,23 @@ pnpm build
 
 Remote Google sign-in, RLS and deployed PWA installation require the personal
 project and HTTPS deployment. Their status is tracked in `HANDOFF.md`.
+
+## AI action suggestions (POC)
+
+The `ai-action-candidates` Edge Function reads one **saved** journal entry under
+the caller's Supabase session, then asks Gemini for up to three editable action
+or habit candidates. It never creates plans automatically. The same entry
+version is cached, and a user can create at most five new analyses per UTC day.
+
+Before deploying the function, apply
+`supabase/migrations/20261010063734_ai_action_suggestions.sql` to the personal
+project. Add these project secrets only in Supabase, never to a Vite `.env`
+file:
+
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL` (optional; defaults to `gemini-2.5-flash-lite`)
+- `APP_ORIGIN=https://life-journal-jh.jakehyun1119.chatgpt.site`
+
+The Edge Function uses the caller's JWT and RLS to read the selected entry. Its
+service-role access is used only to persist the per-entry cache and enforce the
+usage limit. It does not log journal text or prompts.
