@@ -8,6 +8,9 @@ import { cloudRepository, previewRepository, supabase } from './repository';
 import type { Repository } from './model';
 import { Tracker, useHabitDays } from './tracker';
 import { MySpace } from './my-space';
+import { Landing } from './landing';
+import { ThemeSelect, initializeTheme } from './theme';
+import { WeeklyReview } from './weekly-review';
 
 function download(text: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
@@ -86,9 +89,9 @@ type JournalProps = {
   readonly repository: Repository;
   readonly onExit: () => Promise<void>;
 };
-type View = 'today' | 'history' | 'calendar' | 'tracker' | 'my';
-const routeToView: Record<string, View> = { '#today': 'today', '#entries': 'history', '#calendar': 'calendar', '#plans': 'tracker', '#me': 'my' };
-const viewToRoute: Record<View, string> = { today: '#today', history: '#entries', calendar: '#calendar', tracker: '#plans', my: '#me' };
+type View = 'today' | 'history' | 'calendar' | 'tracker' | 'review' | 'my';
+const routeToView: Record<string, View> = { '#today': 'today', '#entries': 'history', '#calendar': 'calendar', '#plans': 'tracker', '#review': 'review', '#me': 'my' };
+const viewToRoute: Record<View, string> = { today: '#today', history: '#entries', calendar: '#calendar', tracker: '#plans', review: '#review', my: '#me' };
 
 function Journal({ locale, onLocale, userId, email, preview, repository, onExit }: JournalProps) {
   const t = messages[locale];
@@ -129,6 +132,8 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
     return () => window.removeEventListener('hashchange', syncRoute);
   }, []);
 
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [view, mode]);
+
   const entries = [...state.entries].sort((a, b) => b.entry_date.localeCompare(a.entry_date) || b.created_at.localeCompare(a.created_at));
   const visible = entries.filter(e => view === 'history' || e.entry_date === today);
   const selected = entries.find(e => e.id === selectedId);
@@ -147,7 +152,8 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   const notices = <>{preview && <div className="banner">{t.previewNote}</div>}{!online && !preview && <div className="banner" role="status">{t.offline}</div>}{state.storageError && <div className="alert" role="alert">{t.draftWarning}</div>}{notice && <div className="alert" role="alert">{notice}</div>}</>;
   const settings = settingsOpen && <><button className="scrim" aria-label={t.close} onClick={() => setSettingsOpen(false)} /><section className="settings-sheet" aria-label={t.settings}>
     <header><div><p className="eyebrow">LIFE JOURNAL</p><h2>{t.settings}</h2></div><button className="icon-button" aria-label={t.close} onClick={() => setSettingsOpen(false)}>×</button></header>
-    <label className="setting-row"><span>{t.language}</span><Language locale={locale} onChange={onLocale} /></label>
+    <div className="setting-row"><span>{t.language}</span><Language locale={locale} onChange={onLocale} /></div>
+    <div className="setting-row"><ThemeSelect locale={locale} /></div>
     <button className="setting-row" disabled={!state.loaded || entries.length === 0} onClick={() => { try { download(markdown(entries)); } catch (error) { if (error instanceof Error) setNotice(t.exportError); else throw error; } }}>{t.export}<span>↓</span></button>
     <div className="settings-account"><span>{preview ? 'Preview' : email}</span><button className="quiet" onClick={() => { void exit(); }}>{preview ? t.exit : t.logout}</button></div>
   </section></>;
@@ -163,24 +169,31 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   </div>;
 
   return <div className="journal-app timeline-workspace">
-    {notices}<header className="journal-topbar"><Brand /><button className="icon-button" aria-label={t.settings} onClick={() => setSettingsOpen(true)}><Sliders /></button></header>
+    {notices}<header className="journal-topbar"><a className="brand-home" href="#welcome" aria-label={locale === 'ko' ? '서비스 소개' : 'About Life Journal'}><Brand /></a><button className="icon-button" aria-label={t.settings} onClick={() => setSettingsOpen(true)}><Sliders /></button></header>
     <main className="timeline-page">{state.loadError ? <section className="empty"><h1>{t.loadError}</h1><button className="primary" onClick={() => { void store.load(); }}>{t.retry}</button></section>
-      : !state.loaded ? <p className="loading" role="status">{t.loading}</p> : view === 'my' ? <MySpace client={preview ? null : supabase} email={email} locale={locale} onPlans={() => navigate('tracker')} onSettings={() => setSettingsOpen(true)} /> : view === 'tracker' ? <Tracker client={preview ? null : supabase} userId={userId} preview={preview} locale={locale} /> : view === 'calendar' ? <><section className="calendar-heading"><p>{t.calendar}</p><div><button className="month-button previous" aria-label="Previous month" onClick={() => setMonth(value => shiftMonth(value, -1))}><Chevron /></button><h1>{formatMonth(month, locale)}</h1><button className="month-button" aria-label="Next month" onClick={() => setMonth(value => shiftMonth(value, 1))}><Chevron /></button></div></section>
+      : !state.loaded ? <p className="loading" role="status">{t.loading}</p> : view === 'my' ? <MySpace client={preview ? null : supabase} email={email} locale={locale} onPlans={() => navigate('tracker')} onReview={() => navigate('review')} onSettings={() => setSettingsOpen(true)} /> : view === 'review' ? <WeeklyReview client={preview ? null : supabase} userId={userId} preview={preview} locale={locale} entries={entries} onOpenEntry={openEntry} /> : view === 'tracker' ? <Tracker client={preview ? null : supabase} userId={userId} preview={preview} locale={locale} /> : view === 'calendar' ? <><section className="calendar-heading"><p>{t.calendar}</p><div><button className="month-button previous" aria-label="Previous month" onClick={() => setMonth(value => shiftMonth(value, -1))}><Chevron /></button><h1>{formatMonth(month, locale)}</h1><button className="month-button" aria-label="Next month" onClick={() => setMonth(value => shiftMonth(value, 1))}><Chevron /></button></div></section>
         <section className="calendar-grid" aria-label={formatMonth(month, locale)}>{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => <span className="calendar-weekday" key={`${day}-${index}`}>{day}</span>)}{monthDays(month).map(day => { const hasEntries = entries.some(entry => entry.entry_date === day.value); const hasHabit = habitDays.has(day.value); return <button key={day.value} className={`calendar-day ${day.inMonth ? '' : 'outside'} ${day.value === today ? 'selected' : ''}`} aria-label={formatDate(day.value, locale)} onClick={() => { setToday(day.value); navigate('today'); }}><span>{day.day}</span>{(hasEntries || hasHabit) && <span className="calendar-markers" aria-hidden="true">{hasEntries && <i className="entry-marker" />}{hasHabit && <i className="habit-marker" />}</span>}</button>; })}</section>
         <section className="calendar-note"><p>{locale === 'ko' ? '파란 점은 일기, 초록 점은 습관 이행이에요. 날짜를 누르면 그날의 기록을 볼 수 있어요.' : 'Blue marks are entries and green marks are habit completions. Choose a date to read what you wrote.'}</p></section></> : <><section className="day-hero"><p>{view === 'today' ? t.todayLabel : t.history}</p><h1>{view === 'today' ? formatDate(today, locale) : t.history}</h1><span>{view === 'today' ? t.todayPrompt : `${entries.length} ${locale === 'en' && entries.length === 1 ? 'entry' : t.entryCount}`}</span></section>
         {view === 'today' && <nav className="week-strip" aria-label={locale === 'ko' ? '이번 주' : 'This week'}>{days.map(day => <button key={day.value} className={day.value === today ? 'week-day active' : 'week-day'} onClick={() => { setToday(day.value); }}><span>{day.label}</span><strong>{day.day}</strong></button>)}</nav>}
         {visible.length ? <section className="entry-feed" aria-label={t.history}>{visible.map(entry => <button className="entry-card" key={entry.id} onClick={() => openEntry(entry.id)}><span className="entry-card-date">{formatDate(entry.entry_date, locale)}</span><h2>{entry.title || entry.body.split('\n')[0]?.slice(0, 70) || t.untitled}</h2><p>{entry.body || t.todayPrompt}</p><small>{state.status[entry.id] === 'error' || state.status[entry.id] === 'conflict' ? '!' : new Intl.DateTimeFormat(locale === 'ko' ? 'ko-KR' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(entry.updated_at))}</small></button>)}</section>
           : <section className="empty timeline-empty"><div className="empty-mark" aria-hidden="true">—</div><h2>{view === 'today' ? t.noToday : t.empty}</h2><p>{view === 'today' ? t.noTodayHelp : t.emptyHelp}</p></section>}</>}
     </main>
-    {view !== 'tracker' && view !== 'my' && <button className="compose-button" disabled={!state.loaded} onClick={create}><Plus />{t.newEntry}</button>}<nav className="bottom-nav" aria-label={locale === 'ko' ? '기록 탐색' : 'Journal navigation'}><button className={view === 'today' ? 'active' : ''} onClick={() => navigate('today')}><span><Book /></span>{t.today}</button><button className={view === 'history' ? 'active' : ''} onClick={() => navigate('history')}><span><Book /></span>{t.history}</button><button className={view === 'calendar' ? 'active' : ''} onClick={() => { setMonth(today.slice(0, 7)); navigate('calendar'); }}><span><Calendar /></span>{t.calendar}</button><button className={view === 'tracker' ? 'active' : ''} onClick={() => navigate('tracker')}><span><CheckSquare /></span>{locale === 'ko' ? '계획' : 'Plans'}</button><button className={view === 'my' ? 'active' : ''} onClick={() => navigate('my')}><span><Person /></span>{locale === 'ko' ? '내 공간' : 'Me'}</button></nav>{settings}
+    {view !== 'tracker' && view !== 'review' && view !== 'my' && <button className="compose-button" disabled={!state.loaded} onClick={create}><Plus />{t.newEntry}</button>}<nav className="bottom-nav" aria-label={locale === 'ko' ? '기록 탐색' : 'Journal navigation'}><button aria-current={view === 'today' ? 'page' : undefined} className={view === 'today' ? 'active' : ''} onClick={() => navigate('today')}><span><Book /></span>{t.today}</button><button aria-current={view === 'history' ? 'page' : undefined} className={view === 'history' ? 'active' : ''} onClick={() => navigate('history')}><span><Book /></span>{t.history}</button><button aria-current={view === 'calendar' ? 'page' : undefined} className={view === 'calendar' ? 'active' : ''} onClick={() => { setMonth(today.slice(0, 7)); navigate('calendar'); }}><span><Calendar /></span>{t.calendar}</button><button aria-current={view === 'tracker' || view === 'review' ? 'page' : undefined} className={view === 'tracker' || view === 'review' ? 'active' : ''} onClick={() => navigate('tracker')}><span><CheckSquare /></span>{locale === 'ko' ? '계획' : 'Plans'}</button><button aria-current={view === 'my' ? 'page' : undefined} className={view === 'my' ? 'active' : ''} onClick={() => navigate('my')}><span><Person /></span>{locale === 'ko' ? '내 공간' : 'Me'}</button></nav>{settings}
   </div>;
 }
 
 export function App() {
+  useEffect(initializeTheme, []);
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(supabase !== null);
   const [preview, setPreview] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(['#welcome', '#how-it-works'].includes(window.location.hash));
+  useEffect(() => {
+    const sync = () => setShowWelcome(['#welcome', '#how-it-works'].includes(window.location.hash));
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, []);
   const [authError, setAuthError] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const t = messages[locale];
@@ -222,24 +235,12 @@ export function App() {
       setAuthError(true); setSigningIn(false);
     }
   }
-  if (repository && (preview || user)) return <Journal key={preview ? 'preview' : user?.id} locale={locale} onLocale={setLocale} userId={preview ? 'preview' : user?.id ?? ''} email={user?.email ?? ''} preview={preview} repository={repository} onExit={async () => {
+  if (!showWelcome && repository && (preview || user)) return <Journal key={preview ? 'preview' : user?.id} locale={locale} onLocale={setLocale} userId={preview ? 'preview' : user?.id ?? ''} email={user?.email ?? ''} preview={preview} repository={repository} onExit={async () => {
     if (preview) { setPreview(false); return; }
     if (supabase) {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     }
   }} />;
-  return <div className="welcome">
-    <header className="welcome-header"><Brand /><Language locale={locale} onChange={setLocale} /></header>
-    <main className="welcome-content">
-      <div className="eyebrow">LIFE JOURNAL / 01</div>
-      <h1>{t.greeting}</h1><p className="intro">{t.intro}</p>
-      <button className="primary google-button" disabled={!supabase || signingIn || loading} onClick={() => { void signIn(); }}>{loading ? t.loading : t.google}</button>
-      <p className="privacy">{t.private}</p>
-      {!supabase && <p className="setup">{t.setup}</p>}
-      {authError && <p className="alert" role="alert">{t.authError}</p>}
-      {!supabase && <button className="quiet preview-link" onClick={() => setPreview(true)}>{t.preview}<span aria-hidden="true"> →</span></button>}
-      <section className="landing-story"><div><p className="eyebrow">WRITE · NOTICE · ACT</p><h2>{locale === 'ko' ? '기록이 다음 행동으로 이어지도록.' : 'Let a note become your next step.'}</h2><p>{locale === 'ko' ? '일기를 쓰고, 해야 할 일을 꺼내고, 반복하고 싶은 일을 목표로 남깁니다.' : 'Write what happened, keep the next action, and return to what matters.'}</p></div><div className="landing-grid"><article><strong>{locale === 'ko' ? '기록과 회고' : 'Journal and review'}</strong><span>{locale === 'ko' ? '날짜·달력·주간 회고' : 'Dates, calendar, weekly reflection'}</span></article><article><strong>{locale === 'ko' ? '행동과 습관' : 'Actions and habits'}</strong><span>{locale === 'ko' ? '인박스·보관함·주간/월간 목표' : 'Inbox, archive, weekly/monthly goals'}</span></article></div><div className="coming-soon"><p className="eyebrow">COMING SOON</p><h3>{locale === 'ko' ? '원할 때만 켜는 개인 비서.' : 'A private assistant, only when you ask.'}</h3><ul><li>{locale === 'ko' ? '일기에서 액션 후보를 제안하는 AI 정리' : 'AI suggestions for action candidates'}</li><li>{locale === 'ko' ? '이메일·브라우저 알림과 리마인더 시간 설정' : 'Email, browser notifications, and reminder times'}</li><li>{locale === 'ko' ? '내 기록을 기반으로 묻는 대화형 회고' : 'Conversational reflection over your own records'}</li><li>{locale === 'ko' ? '개발자를 위한 MCP 연결' : 'MCP connection for developers'}</li></ul></div></section>
-    </main><footer className="welcome-footer">{t.footer}</footer>
-  </div>;
+  return <Landing locale={locale} onLocale={setLocale} loading={loading || signingIn} signedIn={Boolean(user)} canSignIn={Boolean(supabase)} authError={authError} onStart={() => { if (user) { window.location.hash = 'today'; setShowWelcome(false); } else void signIn(); }} onPreview={() => { setPreview(true); setShowWelcome(false); window.location.hash = 'today'; }} />;
 }
