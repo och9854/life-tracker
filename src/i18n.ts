@@ -19,6 +19,7 @@ export const messages = {
     leave: 'Some entries are not synced. Export your writing before signing out, or retry sync.',
     authError: 'Sign-in did not finish. Please try again.', logoutError: 'Could not sign out. Please try again.', exportError: 'Could not export your entries.',
     offline: 'You are offline. Keep writing; drafts stay on this device until you reconnect.',
+    actionFromEntry: 'Turn this into a next step', actionFromEntryHelp: 'Keep one concrete action from this entry in your plans.', actionTitle: 'What will you do next?', actionDue: 'Due date (optional)', addToPlans: 'Add to plans', actionAdded: 'Added to your plans.', actionAddError: 'Could not add this action. Please try again.',
   },
   ko: {
     today: '오늘', history: '기록', calendar: '달력', newEntry: '새 기록', save: '저장', savingNow: '저장 중…', savedNow: '저장됨', language: '언어', back: '기록', settings: '설정', close: '닫기',
@@ -39,6 +40,7 @@ export const messages = {
     leave: '아직 동기화되지 않은 기록이 있어요. 동기화를 다시 시도하거나 기록을 내보낸 뒤 로그아웃해 주세요.',
     authError: '로그인을 완료하지 못했어요. 다시 시도해 주세요.', logoutError: '로그아웃하지 못했어요. 다시 시도해 주세요.', exportError: '기록을 내보내지 못했어요.',
     offline: '오프라인이에요. 다시 연결될 때까지 초안은 이 기기에 보관돼요.',
+    actionFromEntry: '이 기록을 다음 행동으로', actionFromEntryHelp: '이 글에서 이어갈 한 가지를 계획에 남겨보세요.', actionTitle: '다음에 할 일은 무엇인가요?', actionDue: '마감일 (선택)', addToPlans: '계획에 담기', actionAdded: '계획에 담았어요.', actionAddError: '액션을 추가하지 못했어요. 다시 시도해 주세요.',
   },
 } as const;
 
