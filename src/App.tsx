@@ -92,6 +92,9 @@ type JournalProps = {
 type View = 'today' | 'history' | 'calendar' | 'tracker' | 'review' | 'my';
 const routeToView: Record<string, View> = { '#today': 'today', '#entries': 'history', '#calendar': 'calendar', '#plans': 'tracker', '#review': 'review', '#me': 'my' };
 const viewToRoute: Record<View, string> = { today: '#today', history: '#entries', calendar: '#calendar', tracker: '#plans', review: '#review', my: '#me' };
+type PreviewAction = { id: string; title: string; due_date: string | null; completed_at: string | null; archived_at: string | null; source_entry_id: string | null };
+type PreviewTracker = { actions: PreviewAction[]; habits: unknown[]; checks: unknown[] };
+const previewTrackerKey = (userId: string) => `life-journal:tracker:${userId}`;
 
 function Journal({ locale, onLocale, userId, email, preview, repository, onExit }: JournalProps) {
   const t = messages[locale];
@@ -105,6 +108,9 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   const [online, setOnline] = useState(navigator.onLine);
   const [today, setToday] = useState(localDate());
   const [month, setMonth] = useState(today.slice(0, 7));
+  const [nextAction, setNextAction] = useState('');
+  const [nextActionDue, setNextActionDue] = useState('');
+  const [actionStatus, setActionStatus] = useState('');
   const habitDays = useHabitDays({ client: preview ? null : supabase, userId, preview, month, active: view === 'calendar' });
 
   useEffect(() => {
@@ -144,6 +150,24 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
   function create() { setSelectedId(store.add()); setView('today'); setMode('editor'); }
   function navigate(next: View) { window.location.hash = viewToRoute[next]; }
   function openEntry(id: string) { setSelectedId(id); setMode('editor'); }
+  async function addActionFromEntry() {
+    const title = nextAction.trim();
+    if (!title || !selected) return;
+    const action: PreviewAction = { id: crypto.randomUUID(), title, due_date: nextActionDue || null, completed_at: null, archived_at: null, source_entry_id: selected.id };
+    try {
+      if (preview) {
+        const cached = JSON.parse(localStorage.getItem(previewTrackerKey(userId)) ?? '{"actions":[],"habits":[],"checks":[]}') as PreviewTracker;
+        localStorage.setItem(previewTrackerKey(userId), JSON.stringify({ ...cached, actions: [action, ...(cached.actions ?? [])] }));
+      } else {
+        const { error } = await supabase?.from('action_items').insert(action) ?? { error: new Error('Supabase is unavailable') };
+        if (error) throw error;
+      }
+      setNextAction(''); setNextActionDue(''); setActionStatus(t.actionAdded);
+    } catch (error) {
+      if (!(error instanceof Error)) throw error;
+      setActionStatus(t.actionAddError);
+    }
+  }
   async function exit() {
     if (state.pending > 0) { setNotice(t.leave); return; }
     try { await onExit(); }
@@ -165,6 +189,7 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
       <label className="sr-only" htmlFor="entry-title">{t.title}</label><input id="entry-title" className="editor-title" maxLength={200} placeholder={t.title} value={selected.title} onChange={event => store.edit(selected.id, { title: event.target.value, body: selected.body, entry_date: selected.entry_date })} />
       <label className="sr-only" htmlFor="entry-body">{t.body}</label><textarea id="entry-body" key={selected.id} className="editor-body" maxLength={200000} placeholder={t.placeholder} value={selected.body} onChange={event => store.edit(selected.id, { title: selected.title, body: event.target.value, entry_date: selected.entry_date })} />
       <footer className="editor-footer"><span>{t.writingMeta}</span><span>{Array.from(selected.body).length.toLocaleString(locale)} {t.words}</span></footer>
+      <section className="entry-action-capture" aria-label={t.actionFromEntry}><div><p className="eyebrow">{locale === 'ko' ? '기록에서 실천으로' : 'WRITE → ACT'}</p><h2>{t.actionFromEntry}</h2><p>{t.actionFromEntryHelp}</p></div><div className="entry-action-form"><input aria-label={t.actionTitle} value={nextAction} onChange={event => setNextAction(event.target.value)} placeholder={t.actionTitle} onKeyDown={event => { if (event.key === 'Enter') void addActionFromEntry(); }} /><input type="date" aria-label={t.actionDue} value={nextActionDue} onChange={event => setNextActionDue(event.target.value)} /><button disabled={!nextAction.trim()} onClick={() => { void addActionFromEntry(); }}>{t.addToPlans}</button></div>{actionStatus && <p className="entry-action-status" role="status">{actionStatus}</p>}</section>
     </main>{settings}
   </div>;
 
