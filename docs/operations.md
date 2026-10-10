@@ -19,7 +19,10 @@ role keys, or Gemini keys in this repository or client-side environment files.
 
 The first production dashboard-applied migration is
 `20261010063734_ai_action_suggestions.sql`. It adds the `source_entry_id`
-relationship for habits and the private AI candidate cache.
+relationship for habits and the private AI candidate cache. It was applied in
+the personal Supabase SQL Editor because the available scoped CLI token could
+deploy functions but could not link the project for `db push`. Record later
+schema changes in both the timestamped file and the provider migration history.
 
 ## Edge Function deployment
 
