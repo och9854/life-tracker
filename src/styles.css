@@ -42,6 +42,7 @@
 
 .calendar-markers i{background:#496f9d}.calendar-markers .habit-marker{background:#5c8a6f}:root[data-theme="dark"] .calendar-markers i{background:#8ab0df}:root[data-theme="dark"] .calendar-markers .habit-marker{background:#b4d3bb}
 @media(min-width:651px){.tracker-compose:not(.habit-compose){grid-template-columns:minmax(0,1fr) 172px auto}}
+.habit-delete{display:flex;justify-content:flex-end;margin-top:12px}.habit-delete .delete-action{min-height:36px;padding:0 11px;border:1px solid color-mix(in srgb,var(--error) 35%,var(--border));border-radius:9px;background:var(--paper);color:var(--error);font-size:12px;font-weight:700}.habit-delete-confirm{display:grid;gap:12px;width:100%;margin-top:10px;padding:14px;border:1px solid color-mix(in srgb,var(--error) 30%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--paper) 92%,#f9e1df)}.habit-delete-confirm p{margin:0;color:var(--ink);font-size:13px;line-height:1.55}.habit-delete-confirm>div{display:flex;justify-content:flex-end;gap:8px}.habit-delete-confirm .delete-action{background:var(--error);color:white;border-color:var(--error)}
 
 .brand-home{color:inherit;text-decoration:none}
 .landing-site{--canvas:#f8f6f1;--paper:#fffdf8;--soft:#eaf0e7;--ink:#283d32;--secondary:#647065;--border:#d9dfd4;--accent:#426653;--accent-hover:#32513f;--on-accent:#fff;--reward:#b94635;color-scheme:light;background:var(--canvas);color:var(--ink);font-size:16px;line-height:1.8}
