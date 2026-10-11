@@ -29,7 +29,6 @@
 .review-reminder { background: var(--muted); }
 .review-reminder .eyebrow { color: var(--primary); }
 .reminder-choice { display: flex; align-items: center; gap: var(--space-2); color: var(--foreground); font-size: .88rem; }
-.reminder-choice input { width: 20px; height: 20px; accent-color: var(--primary); }
 .calendar-button:disabled { opacity: .45; }
 @media (max-width: 760px) {
   .review-page { gap: var(--space-4); }

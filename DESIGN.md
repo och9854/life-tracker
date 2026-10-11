@@ -51,6 +51,12 @@ Spacing uses a 4px base: `--space-1: 4px`, `--space-2: 8px`, `--space-3: 12px`, 
 
 ## 5. Components
 
+### Shared UI primitives
+- Reuse the token-based shadcn components in `src/components/ui` across the landing page and app: Button, Label, Input, Textarea, Select, Checkbox, DropdownMenu, Dialog, Card, Badge, and Separator.
+- Keep page-level composition and editorial layout in the app stylesheets. Native inputs are only rendered inside the shared Input and Textarea primitives; interactive actions use Button or the matching Radix primitive.
+- Use `?showcase=1` in local development to review control variants, states, focus treatment, and dialog behavior before introducing a new control pattern.
+- Radix portals and modal scroll locking need runtime style attributes and a generated style block, so CSP allows inline styles in style attributes/elements while keeping `script-src` restricted to self.
+
 ### Button
 - **Structure**: shadcn source component using Radix Slot and CVA; text and optional Lucide icon.
 - **Variants**: primary, secondary, outline, ghost, destructive, link; sizes default, small, icon.
@@ -135,5 +141,5 @@ Nested corners reduce by the inner padding; repeated rows use dividers or tonal 
 ### Accepted Debt
 | Item | Location | Why accepted | Owner / Exit |
 |---|---|---|---|
-| Existing journal/tracker styles are replaced incrementally behind a single token layer | `src/styles.css`, `src/weekly-review.css` | Preserves business flows while component markup migrates to shared primitives | Remove legacy selectors touched by this redesign before release |
+| Page layouts remain in the existing stylesheets while shared controls use token-based primitives | `src/styles.css`, `src/weekly-review.css` | Preserves the journal's editorial layout and business flows while controls stay consistent | Remove obsolete selectors during future layout revisions |
 | Full browser coverage of OAuth and remote account data cannot run from preview mode | Auth flow | Avoids changing user account state during visual checks | Recheck with signed-in personal Chrome session before production release |

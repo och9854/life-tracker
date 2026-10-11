@@ -10,7 +10,7 @@ import { XIcon } from "lucide-react"
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" modal={false} {...props} />
+  return <DialogPrimitive.Root data-slot="dialog" modal {...props} />
 }
 
 function DialogTrigger({
@@ -35,19 +35,7 @@ function DialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
-  return (
-    <DialogPrimitive.Close asChild>
-      <div
-        data-slot="dialog-overlay"
-        aria-hidden="true"
-        className={cn(
-          "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
-          className
-        )}
-        {...props}
-      />
-    </DialogPrimitive.Close>
-  )
+  return <DialogPrimitive.Overlay data-slot="dialog-overlay" className={cn("fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0", className)} {...props} />
 }
 
 function DialogContent({
@@ -59,38 +47,14 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  function trapFocus(event: React.KeyboardEvent<HTMLDivElement>) {
-    onKeyDown?.(event)
-    if (event.defaultPrevented || event.key !== "Tab") return
-
-    const focusable = event.currentTarget.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    )
-    const first = focusable[0]
-    const last = focusable[focusable.length - 1]
-    if (!first || !last) {
-      event.preventDefault()
-      event.currentTarget.focus()
-      return
-    }
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault()
-      last.focus()
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault()
-      first.focus()
-    }
-  }
-
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        aria-modal="true"
-        onKeyDown={trapFocus}
+        onKeyDown={onKeyDown}
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "dialog-centered fixed top-1/2 left-1/2 z-50 grid max-h-[min(90dvh,48rem)] w-full max-w-[calc(100%-2rem)] gap-4 overflow-y-auto rounded-[var(--radius-sheet)] border border-border bg-popover p-5 text-sm text-popover-foreground shadow-[var(--shadow-sheet)] outline-none sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
