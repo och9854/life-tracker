@@ -3,7 +3,7 @@
 ## Production resources
 
 - **Supabase project:** `norzflwojwutofzkwzxu` in the personal organization.
-- **Static site:** `https://life-journal-jh.jakehyun1119.chatgpt.site`
+- **Static site:** `https://life-tracker-sigma-five.vercel.app`
 - **GitHub repository:** `och9854/life-tracker`
 
 Do not place access tokens, database passwords, OAuth client secrets, service
@@ -35,7 +35,7 @@ Required project secret:
 Optional secrets:
 
 - `GEMINI_MODEL` — defaults to `gemini-2.5-flash-lite`.
-- `APP_ORIGIN` — the exact public web origin allowed by CORS.
+- `APP_ORIGIN` — the exact public web origin allowed by CORS. It defaults to the production Vercel origin above when unset.
 
 Before publishing a new function version, run:
 

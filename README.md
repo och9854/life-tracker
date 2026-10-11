@@ -81,7 +81,7 @@ file:
 
 - `GEMINI_API_KEY`
 - `GEMINI_MODEL` (optional; defaults to `gemini-2.5-flash-lite`)
-- `APP_ORIGIN=https://life-journal-jh.jakehyun1119.chatgpt.site`
+- `APP_ORIGIN=https://life-tracker-sigma-five.vercel.app`
 
 The Edge Function uses the caller's JWT and RLS to read the selected entry. Its
 service-role access is used only to persist the per-entry cache and enforce the

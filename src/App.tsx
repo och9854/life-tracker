@@ -13,6 +13,12 @@ import { ThemeSelect, initializeTheme } from './theme';
 import { WeeklyReview } from './weekly-review';
 import { actionSuggestionResponseSchema } from './ai';
 import type { ActionSuggestion } from './ai';
+import { PrimitiveShowcase } from '@/components/ui/showcase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ArrowLeft as ArrowLeftIcon, BookOpen, CalendarDays, CheckSquare, ChevronRight, Ellipsis, Plus as PlusIcon, SlidersHorizontal, UserRound } from 'lucide-react';
 
 function download(text: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
@@ -35,15 +41,14 @@ function Brand() {
   return <div className="brand"><img src="/icon.svg" width="32" height="32" alt="" /><span>Life Journal</span></div>;
 }
 
-function ArrowLeft() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7M8 12h9" /></svg>; }
-function Plus() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>; }
-function Dots() { return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></svg>; }
-function Sliders() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6" /></svg>; }
-function Book() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17.5H7.5A2.5 2.5 0 0 0 5 22V4.5Zm0 0V19.5" /></svg>; }
-function Calendar() { return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></svg>; }
-function CheckSquare() { return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8 12 2.5 2.5L16 9" /></svg>; }
-function Person() { return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M4.5 21c.8-3.6 3.2-5.5 7.5-5.5s6.7 1.9 7.5 5.5" /></svg>; }
-function Chevron() { return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>; }
+function ArrowLeft() { return <ArrowLeftIcon aria-hidden="true" />; }
+function Plus() { return <PlusIcon aria-hidden="true" />; }
+function Dots() { return <Ellipsis aria-hidden="true" />; }
+function Sliders() { return <SlidersHorizontal aria-hidden="true" />; }
+function Book() { return <BookOpen aria-hidden="true" />; }
+function Calendar() { return <CalendarDays aria-hidden="true" />; }
+function Person() { return <UserRound aria-hidden="true" />; }
+function Chevron() { return <ChevronRight aria-hidden="true" />; }
 
 function weekDays(today: string, locale: Locale) {
   const date = new Date(`${today}T12:00:00`);
@@ -216,26 +221,26 @@ function Journal({ locale, onLocale, userId, email, preview, repository, onExit 
     catch (error) { if (error instanceof Error) setNotice(t.logoutError); else throw error; }
   }
   const notices = <>{preview && <div className="banner">{t.previewNote}</div>}{!online && !preview && <div className="banner" role="status">{t.offline}</div>}{state.storageError && <div className="alert" role="alert">{t.draftWarning}</div>}{notice && <div className="alert" role="alert">{notice}</div>}</>;
-  const settings = settingsOpen && <><button className="scrim" aria-label={t.close} onClick={() => setSettingsOpen(false)} /><section className="settings-sheet" aria-label={t.settings}>
-    <header><div><p className="eyebrow">LIFE JOURNAL</p><h2>{t.settings}</h2></div><button className="icon-button" aria-label={t.close} onClick={() => setSettingsOpen(false)}>×</button></header>
+  const settings = <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}><DialogContent className="settings-dialog" showCloseButton={false}>
+    <DialogHeader className="settings-dialog-heading"><div><p className="eyebrow">LIFE JOURNAL</p><DialogTitle>{t.settings}</DialogTitle></div><DialogClose asChild><Button className="icon-button" variant="ghost" size="icon" aria-label={t.close}>×</Button></DialogClose></DialogHeader>
     <div className="setting-row"><span>{t.language}</span><Language locale={locale} onChange={onLocale} /></div>
     <div className="setting-row"><ThemeSelect locale={locale} /></div>
     <button className="setting-row" disabled={!state.loaded || entries.length === 0} onClick={() => { try { download(markdown(entries)); } catch (error) { if (error instanceof Error) setNotice(t.exportError); else throw error; } }}>{t.export}<span>↓</span></button>
     <div className="settings-account"><span>{preview ? 'Preview' : email}</span><button className="quiet" onClick={() => { void exit(); }}>{preview ? t.exit : t.logout}</button></div>
-  </section></>;
+  </DialogContent></Dialog>;
 
   if (mode === 'editor' && selected) return <div className="journal-app editor-workspace">
-    {notices}<header className="editor-topbar"><button className="back-button" onClick={() => setMode('timeline')}><ArrowLeft />{t.back}</button><div className="editor-actions"><span className={`save-state ${status === 'error' || status === 'conflict' ? 'failed' : ''}`} role="status" aria-live="polite">{statusText}</span><button className="save-button" disabled={status === 'saving' || status === 'conflict'} onClick={() => { void store.flush(); }}>{status === 'saving' ? t.savingNow : status === 'saved' ? t.savedNow : t.save}</button><button className="icon-button" aria-label={t.settings} onClick={() => setSettingsOpen(true)}><Dots /></button></div></header>
+    {notices}<header className="editor-topbar"><Button className="back-button" variant="ghost" onClick={() => setMode('timeline')}><ArrowLeft />{t.back}</Button><div className="editor-actions"><span className={`save-state ${status === 'error' || status === 'conflict' ? 'failed' : ''}`} role="status" aria-live="polite">{statusText}</span><Button className="save-button" disabled={status === 'saving' || status === 'conflict'} onClick={() => { void store.flush(); }}>{status === 'saving' ? t.savingNow : status === 'saved' ? t.savedNow : t.save}</Button><Button className="icon-button" variant="outline" size="icon" aria-label={t.settings} onClick={() => setSettingsOpen(true)}><Dots /></Button></div></header>
     <main className="editor-page"><label className="entry-date"><span className="sr-only">{t.date}</span><input type="date" value={selected.entry_date} required onChange={event => { if (event.target.validity.valid && event.target.value) store.edit(selected.id, { title: selected.title, body: selected.body, entry_date: event.target.value }); }} /></label>
       {(status === 'error' || status === 'conflict') && <button className="quiet recovery" onClick={() => { if (status === 'conflict') { const id = store.keepAsNew(selected.id); if (id) setSelectedId(id); } else void store.flush(); }}>{status === 'conflict' ? t.copy : t.retry}</button>}
-      <label className="sr-only" htmlFor="entry-title">{t.title}</label><input id="entry-title" className="editor-title" maxLength={200} placeholder={t.title} value={selected.title} onChange={event => store.edit(selected.id, { title: event.target.value, body: selected.body, entry_date: selected.entry_date })} />
-      <label className="sr-only" htmlFor="entry-body">{t.body}</label><textarea id="entry-body" key={selected.id} className="editor-body" maxLength={200000} placeholder={t.placeholder} value={selected.body} onChange={event => store.edit(selected.id, { title: selected.title, body: event.target.value, entry_date: selected.entry_date })} />
+      <label className="sr-only" htmlFor="entry-title">{t.title}</label><Input id="entry-title" className="editor-title" maxLength={200} placeholder={t.title} value={selected.title} onChange={event => store.edit(selected.id, { title: event.target.value, body: selected.body, entry_date: selected.entry_date })} />
+      <label className="sr-only" htmlFor="entry-body">{t.body}</label><Textarea id="entry-body" key={selected.id} className="editor-body" maxLength={200000} placeholder={t.placeholder} value={selected.body} onChange={event => store.edit(selected.id, { title: selected.title, body: event.target.value, entry_date: selected.entry_date })} />
       <footer className="editor-footer"><span>{t.writingMeta}</span><span>{Array.from(selected.body).length.toLocaleString(locale)} {t.words}</span></footer>
-      <section className="entry-action-capture" aria-label={t.actionFromEntry}><div><p className="eyebrow">{locale === 'ko' ? '기록에서 실천으로' : 'WRITE → ACT'}</p><h2>{t.actionFromEntry}</h2><p>{t.actionFromEntryHelp}</p></div><div className="entry-action-form"><input aria-label={t.actionTitle} value={nextAction} onChange={event => setNextAction(event.target.value)} placeholder={t.actionTitle} onKeyDown={event => { if (event.key === 'Enter') void addActionFromEntry(); }} /><input type="date" aria-label={t.actionDue} value={nextActionDue} onChange={event => setNextActionDue(event.target.value)} /><button disabled={!nextAction.trim()} onClick={() => { void addActionFromEntry(); }}>{t.addToPlans}</button></div>{actionStatus && <p className="entry-action-status" role="status">{actionStatus}</p>}
+      <section className="entry-action-capture" aria-label={t.actionFromEntry}><div><p className="eyebrow">{locale === 'ko' ? '기록에서 실천으로' : 'WRITE → ACT'}</p><h2>{t.actionFromEntry}</h2><p>{t.actionFromEntryHelp}</p></div><div className="entry-action-form"><input aria-label={t.actionTitle} value={nextAction} onChange={event => setNextAction(event.target.value)} placeholder={t.actionTitle} onKeyDown={event => { if (event.key === 'Enter') void addActionFromEntry(); }} /><input type="date" aria-label={t.actionDue} value={nextActionDue} onChange={event => setNextActionDue(event.target.value)} /><Button disabled={!nextAction.trim()} onClick={() => { void addActionFromEntry(); }}>{t.addToPlans}</Button></div>{actionStatus && <p className="entry-action-status" role="status">{actionStatus}</p>}
         <div className="ai-action-divider" />
-        <div className="ai-action-intro"><div><h3>{t.aiActionTitle}</h3><p>{t.aiActionHelp}</p></div><button className="ai-suggest-button" disabled={aiStatus === t.aiLoading} onClick={() => { void findActionCandidates(); }}>{aiStatus === t.aiLoading ? t.aiLoading : t.aiActionButton}</button></div>
+        <div className="ai-action-intro"><div><h3>{t.aiActionTitle}</h3><p>{t.aiActionHelp}</p></div><Button className="ai-suggest-button" disabled={aiStatus === t.aiLoading} onClick={() => { void findActionCandidates(); }}>{aiStatus === t.aiLoading ? t.aiLoading : t.aiActionButton}</Button></div>
         {aiStatus && <p className="entry-action-status" role="status">{aiStatus}</p>}
-        {suggestions.length > 0 && <div className="ai-suggestion-list">{suggestions.map(suggestion => <article className="ai-suggestion" key={suggestion.id}><p className="ai-suggestion-source">“{suggestion.sourceQuote}”</p><p className="ai-suggestion-reason">{suggestion.reason}</p><div className="ai-suggestion-form"><input aria-label={t.actionTitle} value={suggestion.title} onChange={event => updateSuggestion(suggestion.id, { title: event.target.value })} /><select aria-label={t.aiSuggestionType} value={suggestion.type} onChange={event => updateSuggestion(suggestion.id, { type: event.target.value === 'habit' ? 'habit' : 'action' })}><option value="action">{t.aiActionType}</option><option value="habit">{t.aiHabitType}</option></select><button disabled={!suggestion.title.trim()} onClick={() => { void addSuggestionToPlans(suggestion); }}>{t.addToPlans}</button></div></article>)}</div>}
+        {suggestions.length > 0 && <div className="ai-suggestion-list">{suggestions.map(suggestion => <article className="ai-suggestion" key={suggestion.id}><p className="ai-suggestion-source">“{suggestion.sourceQuote}”</p><p className="ai-suggestion-reason">{suggestion.reason}</p><div className="ai-suggestion-form"><input aria-label={t.actionTitle} value={suggestion.title} onChange={event => updateSuggestion(suggestion.id, { title: event.target.value })} /><select aria-label={t.aiSuggestionType} value={suggestion.type} onChange={event => updateSuggestion(suggestion.id, { type: event.target.value === 'habit' ? 'habit' : 'action' })}><option value="action">{t.aiActionType}</option><option value="habit">{t.aiHabitType}</option></select><Button disabled={!suggestion.title.trim()} onClick={() => { void addSuggestionToPlans(suggestion); }}>{t.addToPlans}</Button></div></article>)}</div>}
       </section>
     </main>{settings}
   </div>;
@@ -259,7 +264,7 @@ export function App() {
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(supabase !== null);
-  const [preview, setPreview] = useState(false);
+  const [preview, setPreview] = useState(() => window.location.hostname === '127.0.0.1' && new URLSearchParams(window.location.search).has('preview'));
   const [showWelcome, setShowWelcome] = useState(['#welcome', '#how-it-works'].includes(window.location.hash));
   useEffect(() => {
     const sync = () => setShowWelcome(['#welcome', '#how-it-works'].includes(window.location.hash));
@@ -295,6 +300,8 @@ export function App() {
     if (user && supabase) return cloudRepository(supabase, user.id);
     return null;
   }, [preview, user?.id]);
+
+  if ((import.meta.env.DEV || window.location.hostname === '127.0.0.1') && new URLSearchParams(window.location.search).has('showcase')) return <PrimitiveShowcase />;
 
   async function signIn() {
     if (!supabase) return;

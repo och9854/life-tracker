@@ -1,78 +1,139 @@
-# Life Journal
+# Life Journal Design System
 
-## Direction
-A calm mobile-first journal: browse entries as a day timeline, then enter a
-separate focused writing surface. The reference direction borrows Day One's
-timeline, Bear's uncluttered editor, and Journey's time-oriented context while
-using original copy and identity. No illustrations or dashboard metrics are
-needed for the initial diary.
+## 1. Atmosphere & Identity
 
-## Tokens
-- Canvas #f7f7f3; paper #ffffff; soft surface #eef2f6.
-- Ink #262b30; secondary #747a80; border #e2e5e7.
-- Accent #496f9d; accent hover #385b86; on-accent #ffffff.
-- Error #9b3535; success #496f9d.
-- Dark: canvas #1d2228; paper #242b32; soft #303942; ink #eff2f4;
-  secondary #aeb7bf; border #3c4650; accent #8ab0df; on-accent #18212b;
-  error #ffb4ab.
-- Type: system sans-serif (including Apple SD Gothic Neo and Malgun Gothic);
-  display serif Georgia/Noto Serif KR with system fallback.
-- Type scale: 12, 14, 16, 18, 24, 32, 40px. Body line height 1.8.
-- Spacing: 4, 8, 12, 16, 24, 32, 48, 64px.
-- Radius: 8px controls, 16px writing paper; borders 1px.
-- Shadow: 0 8px 32px rgb(41 45 40 / 0.04).
+Life Journal should feel like a personal notebook that quietly helps its owner keep promises to themselves. The visual direction is **warm editorial utility**: paper and ink, clear modern controls, and a small forest-green accent. Notion's warm minimalism informs whitespace, soft neutral surfaces, and serif display moments; Life Journal keeps its own Korean school reward-chart apple as the signature. The app shell is redesigned around shadcn/ui source components, but those components must take Life Journal tokens rather than their defaults.
 
-## Layout and primitives
-The app separates three destinations: Today for writing, Entries for browsing,
-and Calendar for date-led recall. Today alone owns the week strip; Entries is a
-clean chronological feed; Calendar is its own month grid and opens that day's
-entries. The editor owns its screen: a back control, a labelled Save action,
-date, optional title, and generous writing space. Input is saved immediately as
-a device draft. The Save button writes to the cloud; no typing-driven cloud
-writes occur. Settings live in a bottom sheet with language, export, and
-account controls. The desktop layout keeps the same hierarchy in a 760px
-reading column instead of adding a persistent sidebar. Buttons have text labels,
-44px minimum touch targets and visible focus rings. States: default, hover,
-pressed, disabled, saving, saved, local draft, failure. Empty history keeps the
-compose action available. Errors retain editor text. Language never changes
-diary text.
+## 2. Color
 
-## Accessibility and scope
-Support keyboard navigation, 200% zoom, 360px phone width, light/dark system
-preference and reduced motion. Motion is limited to 160ms opacity/transform
-feedback for press and view transitions, disabled under reduced motion. Use
-semantic landmarks, form labels and a polite saving status. Persist drafts per signed-in user.
-Initial preview explicitly labels device-only sample mode; it is never reported
-as cloud storage. Authentication and database checks need a personal project.
+| Role | Token | Light | Dark | Usage |
+|---|---|---|---|---|
+| Canvas | `--background` | `#f8f6f1` | `#191f1d` | App and page background |
+| Paper | `--card` | `#fffefa` | `#232c27` | Journal, habit, and review surfaces |
+| Soft surface | `--muted` | `#eeeee7` | `#303a34` | Quiet controls and selected rows |
+| Primary ink | `--foreground` | `#303632` | Main text |
+| Secondary ink | `--muted-foreground` | `#69716a` | Metadata and guidance |
+| Border | `--border` | `#e3e4dc` | Dividers and control edges |
+| Primary action | `--primary` | `#426653` | Save, create, selected navigation |
+| Primary hover | `--primary-hover` | `#345240` | Hover and pressed primary actions |
+| On primary | `--primary-foreground` | `#ffffff` | Primary action labels |
+| Apple progress | `--apple` | `#c84939` | Habit reward fill and progress label |
+| Destructive | `--destructive` | `#9b3535` | Delete and error states |
+| Success | `--success` | `#426653` | Saved and completed states |
 
-## October polish: a personal progress notebook
-Retain the five destinations and the Korean school reward-chart apple motif.
-Use a warm ivory canvas (#f8f6f1), white paper, charcoal ink (#303632),
-forest accent (#426653), muted ink (#69716a), and neutral borders (#e3e4dc).
-Dark mode uses #191f1d canvas, #232c27 paper, #b4d3bb accent and #b1bcb3 muted ink.
-Apple red is #c84939 in light mode and #ffb0a0 in dark mode for readable labels.
-Headings: 32–40px serif; body 16px; labels 12–14px. Controls at least 44px.
-Use 24px card padding, 16px gaps, 20px corners, a quiet paper shadow.
-The document owns scroll. Navigation spans five equal columns on phones, with
-safe-area padding and reserved page space. Desktop navigation stays centered.
-Plans: a factual summary, a compact action form, collapsible labelled habit
-creation, apple progress cards and explicitly labelled today steppers.
-History affordances are visible. No new libraries or decorative animation.
-Accepted debt: older CSS declarations remain until a dedicated cleanup; scoped
-polish rules provide the final shared tokens and responsive behavior.
+Dark theme equivalents: canvas `#191f1d`, paper `#232c27`, muted `#303a34`, foreground `#eff2ef`, secondary `#b1bcb3`, border `#3b463f`, primary `#b4d3bb`, primary foreground `#1a241e`, apple `#ffb0a0`, destructive `#ffb4ab`, success `#b4d3bb`.
 
-## Landing / welcome
-An editorial cream-paper landing page with forest typography and apple-red
-highlights, distinct from the app's system-aware dark mode. Desktop hero uses
-two columns: a 56px headline and a notebook demonstration. Mobile stacks both.
-Maximum width 1120px, section spacing 80px, body 16px/1.8, cards 24px padding.
-Use the real apple progress primitive for a clearly labelled interactive sample.
-Sections: hero and Google CTA, three-step product explanation, interactive
-habit preview, clearly unavailable roadmap, FAQ, closing CTA. English/Korean.
-No fabricated testimonials, usage numbers, pricing or available AI claims.
-Anchor #welcome is accessible with or without an authenticated session.
+Use semantic tokens through CSS variables and Tailwind/shadcn mappings. Do not add arbitrary colors in component styles. Apple red belongs to progress only; green remains the sole primary action accent.
 
-## Appearance preference
-Offer System / Light / Dark in journal settings and landing header. Persist the
-choice on this device. System reacts to OS appearance changes; explicit choices
-override OS mode. The root data-theme attribute controls both app and landing.
+## 3. Typography
+
+| Level | Size | Weight | Line height | Usage |
+|---|---:|---:|---:|---|
+| Display | `clamp(2.25rem, 5vw, 3.5rem)` | 500 | 1.12 | Landing and reflection title |
+| H1 | `2rem` | 600 | 1.25 | App page title |
+| H2 | `1.5rem` | 600 | 1.35 | Page sections |
+| H3 | `1.125rem` | 600 | 1.45 | Cards and entry titles |
+| Body | `1rem` | 400 | 1.7 | Journal and supporting copy |
+| Body small | `.875rem` | 400 | 1.55 | Secondary information |
+| Label | `.75rem` | 600 | 1.4 | Field labels and overlines |
+
+Primary stack: system sans with `-apple-system`, `Apple SD Gothic Neo`, and `Malgun Gothic` for platform-native Korean. Display serif: Georgia, `Noto Serif KR`, serif. No more than these two families; body copy never falls below 14px.
+
+## 4. Spacing & Layout
+
+Spacing uses a 4px base: `--space-1: 4px`, `--space-2: 8px`, `--space-3: 12px`, `--space-4: 16px`, `--space-5: 20px`, `--space-6: 24px`, `--space-8: 32px`, `--space-10: 40px`, `--space-12: 48px`, `--space-16: 64px`.
+
+- Reading surface max width: 760px; app content max width: 1040px; landing max width: 1120px.
+- Desktop shell: centered reading surface with a compact topbar and bottom navigation; do not add an always-visible sidebar.
+- Mobile: one column, 16px page gutters, five equal bottom-navigation destinations plus safe-area inset. The document owns vertical scrolling; editor text owns its own input scroll.
+- Breakpoints: 640px, 768px, 1024px, 1280px.
+- Today prioritizes the writing prompt; Plans prioritizes next actions and visible habit progress; Calendar is date-led; Review is reflective and quiet.
+
+## 5. Components
+
+### Button
+- **Structure**: shadcn source component using Radix Slot and CVA; text and optional Lucide icon.
+- **Variants**: primary, secondary, outline, ghost, destructive, link; sizes default, small, icon.
+- **Spacing**: 44px minimum interactive height; 8px icon gap; control radius token.
+- **States**: default, hover, active, focus-visible, disabled, loading.
+- **Accessibility**: native button semantics; icon-only buttons include an accessible name; visible focus ring.
+- **Motion**: 140ms transform/opacity response; disabled by reduced-motion preference.
+- **Layout**: cluster; no scroll ownership.
+
+### Card
+- **Structure**: shadcn Card, Header, Title, Description, Content, Footer source primitives.
+- **Variants**: paper, inset, progress, editorial.
+- **Spacing**: 24px desktop padding, 16px mobile padding; 16px internal gaps.
+- **States**: default, hover when interactive, selected wash, loading, empty, error.
+- **Accessibility**: use semantic heading order; interactive card has one clear focus target.
+- **Motion**: no idle animation; interactive state changes use 140ms transform/opacity.
+- **Layout**: stack/grid; page remains the scroll owner.
+
+### Field
+- **Structure**: visible label, shadcn Input or Textarea, optional hint and inline error.
+- **Variants**: text, date, number, long-form journal body.
+- **Spacing**: 12px label gap; 12px control padding; 44px minimum control height.
+- **States**: default, hover, focus-visible, disabled, invalid, saved draft.
+- **Accessibility**: programmatic label, described hint/error, no placeholder-only names.
+- **Motion**: focus ring appears immediately; no layout animation.
+- **Layout**: stack; long-form textarea is the editor scroll owner.
+
+### Navigation
+- **Structure**: five text-labeled destinations with consistent 20px Lucide outline icons.
+- **Variants**: desktop centered dock, mobile fixed bottom bar with safe-area padding.
+- **Spacing**: 44px target minimum; 8px icon/label gap; equal mobile columns.
+- **States**: default, active wash with glyph/state, hover, focus-visible.
+- **Accessibility**: `aria-current="page"`, named navigation landmark, keyboard reachable.
+- **Motion**: active wash cross-fades in 140ms; reduced motion is respected.
+- **Layout**: fixed only on mobile; page reserves matching bottom space.
+
+### HabitProgress
+- **Structure**: custom SVG apple split into target-count slices, with completion text and count.
+- **Variants**: compact list, full card, interactive daily stepper.
+- **Spacing**: 12px apple/count gap; card uses standard spacing tokens.
+- **States**: empty, partial, goal reached, disabled, error.
+- **Accessibility**: visible count and accessible progress label; completion is never conveyed by color alone.
+- **Motion**: filled slice uses a 180ms opacity fade, with reduced-motion support.
+- **Layout**: inline or card; no scroll ownership.
+
+### Sheet
+- **Structure**: shadcn Dialog source primitives with overlay, title, close button, and content.
+- **Variants**: settings, habit history, confirm delete.
+- **Spacing**: 24px desktop, 16px mobile; maximum width 520px.
+- **States**: open, closed, busy, error.
+- **Accessibility**: focus trapping, Escape close, title association, visible cancel for destructive confirmation.
+- **Motion**: opacity/transform transition; reduced-motion path is a cross-fade.
+- **Layout**: modal layer above page; sheet content scrolls when it exceeds the viewport.
+
+## 6. Motion & Interaction
+
+Use 140ms ease-out for control feedback and 220ms cubic-bezier(0.2, 0.8, 0.2, 1) for sheets or view changes. Animate transform and opacity only. No decorative looping or scroll reveal is used in the private journal. Respect `prefers-reduced-motion`; all interactions remain immediate and usable.
+
+## 7. Depth & Surface
+
+Use **mixed but restrained paper surfaces**: thin warm borders establish boundaries; a soft layered shadow separates only the active editor, modal, and featured progress surface. Avoid glass blur on scrolling content and avoid framing every row as a card.
+
+| Token | Value | Usage |
+|---|---|---|
+| `--radius-control` | `10px` | Buttons and fields |
+| `--radius-card` | `16px` | Cards and paper |
+| `--radius-sheet` | `22px` | Modal and settings sheet |
+| `--radius-pill` | `9999px` | Progress labels and small status tags |
+| `--shadow-paper` | `0 8px 28px rgb(41 45 40 / .055)` | Raised paper |
+| `--shadow-sheet` | `0 24px 72px rgb(24 31 27 / .18)` | Modal and overlay |
+
+Nested corners reduce by the inner padding; repeated rows use dividers or tonal washes instead of card-on-card borders.
+
+## 8. Accessibility Constraints & Accepted Debt
+
+### Constraints
+- Target WCAG 2.2 AA: 4.5:1 body text, 3:1 large text and control edges.
+- Support 360px mobile width, 200% zoom, keyboard navigation, visible focus, screen-reader labels, reduced motion, and both color schemes.
+- Korean copy may wrap naturally and must not clip; long labels and empty/error/loading states are designed.
+- Theme selector exposes System, Light, and Dark; system preference updates until a manual override is chosen.
+
+### Accepted Debt
+| Item | Location | Why accepted | Owner / Exit |
+|---|---|---|---|
+| Existing journal/tracker styles are replaced incrementally behind a single token layer | `src/styles.css`, `src/weekly-review.css` | Preserves business flows while component markup migrates to shared primitives | Remove legacy selectors touched by this redesign before release |
+| Full browser coverage of OAuth and remote account data cannot run from preview mode | Auth flow | Avoids changing user account state during visual checks | Recheck with signed-in personal Chrome session before production release |
