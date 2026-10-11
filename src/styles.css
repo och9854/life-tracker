@@ -168,7 +168,7 @@
 .week-day.active { background: var(--accent); color: var(--foreground); }
 .week-day.active strong { background: var(--primary); color: var(--primary-foreground); }
 .entry-feed { display: grid; gap: var(--space-3); padding: var(--space-6) 0 var(--space-4); }
-.entry-card { display: block; width: 100%; min-height: 0; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); padding: var(--space-5) var(--space-6); box-shadow: 0 2px 8px rgb(41 45 40 / .025); color: var(--foreground); text-align: left; transition: transform 160ms ease-out, box-shadow 160ms ease-out, background-color 160ms ease-out; }
+.entry-card { display: block; width: 100%; height: auto; min-height: 0; white-space: normal; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); padding: var(--space-5) var(--space-6); box-shadow: 0 2px 8px rgb(41 45 40 / .025); color: var(--foreground); text-align: left; transition: transform 160ms ease-out, box-shadow 160ms ease-out, background-color 160ms ease-out; }
 .entry-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-paper); }
 .entry-card h2 { margin-bottom: var(--space-2); font-size: 1.125rem; font-weight: 620; letter-spacing: -.025em; line-height: 1.4; }
 .entry-card p { display: -webkit-box; overflow: hidden; color: var(--muted-foreground); font-size: .9rem; line-height: 1.65; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
