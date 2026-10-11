@@ -33,6 +33,10 @@ The **Confirm signup** and **Reset password** email templates must both include
 `{{ .Token }}`. Life Journal asks the person to enter that six-digit code; it
 does not depend on a magic link opening in the same browser.
 
+Use the approved Korean subjects and HTML bodies in
+[email-templates.md](email-templates.md). Keep the template itself Korean for
+the initial audience; the app language remains user-selectable.
+
 Before inviting anyone outside the Supabase team, configure a personal custom
 SMTP provider. The built-in sender is only suitable for limited team testing
 and is not a public delivery service. Keep SMTP credentials in Supabase Auth

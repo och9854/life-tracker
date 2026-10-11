@@ -53,7 +53,7 @@ export function initialLocale(): Locale {
   } catch (error) {
     if (!(error instanceof Error)) throw error;
   }
-  return navigator.language.toLowerCase().startsWith('ko') ? 'ko' : 'en';
+  return 'ko';
 }
 
 export function formatDate(date: string, locale: Locale): string {

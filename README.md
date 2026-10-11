@@ -51,7 +51,7 @@ implemented. Do not describe the preview as a live cloud diary.
 
 ## Behavior
 
-- English/Korean UI follows the browser on first visit; manual choice persists.
+- Korean is the default UI on first visit; a manual English/Korean choice persists.
 - Diary text is never translated. Multiple entries per local date are allowed.
 - Saves debounce for 650ms. Pending drafts are retained on failure and retried
   on reconnect, focus, or explicit retry. Version conflicts require keeping a
@@ -68,7 +68,8 @@ pnpm build
 
 Remote Google sign-in, RLS and deployed PWA installation require the personal
 project and HTTPS deployment. The service architecture, operational procedure,
-and decision history are maintained in [docs/](docs/README.md).
+and decision history are maintained in [docs/](docs/README.md). The approved
+Korean authentication email copy is in [docs/email-templates.md](docs/email-templates.md).
 
 ## AI action suggestions (POC)
 
