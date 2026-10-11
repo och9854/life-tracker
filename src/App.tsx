@@ -305,7 +305,7 @@ export function App() {
 
   if ((import.meta.env.DEV || window.location.hostname === '127.0.0.1') && new URLSearchParams(window.location.search).has('showcase')) return <PrimitiveShowcase />;
 
-  async function signIn() {
+  async function signInWithGoogle() {
     if (!supabase) return;
     setSigningIn(true); setAuthError(false);
     try {
@@ -316,6 +316,36 @@ export function App() {
       setAuthError(true); setSigningIn(false);
     }
   }
+  async function signInWithEmail(email: string, password: string): Promise<string | null> {
+    if (!supabase) return 'Sign-in is not configured.';
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return error?.message ?? null;
+  }
+  async function signUpWithEmail(email: string, password: string): Promise<string | null> {
+    if (!supabase) return 'Sign-in is not configured.';
+    const { error } = await supabase.auth.signUp({ email, password });
+    return error?.message ?? null;
+  }
+  async function verifySignupCode(email: string, token: string): Promise<string | null> {
+    if (!supabase) return 'Sign-in is not configured.';
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'signup' });
+    return error?.message ?? null;
+  }
+  async function requestPasswordReset(email: string): Promise<string | null> {
+    if (!supabase) return 'Sign-in is not configured.';
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    return error?.message ?? null;
+  }
+  async function verifyRecoveryCode(email: string, token: string): Promise<string | null> {
+    if (!supabase) return 'Sign-in is not configured.';
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'recovery' });
+    return error?.message ?? null;
+  }
+  async function updatePassword(password: string): Promise<string | null> {
+    if (!supabase) return 'Sign-in is not configured.';
+    const { error } = await supabase.auth.updateUser({ password });
+    return error?.message ?? null;
+  }
   if (!showWelcome && repository && (preview || user)) return <Journal key={preview ? 'preview' : user?.id} locale={locale} onLocale={setLocale} userId={preview ? 'preview' : user?.id ?? ''} email={user?.email ?? ''} preview={preview} repository={repository} onExit={async () => {
     if (preview) { setPreview(false); return; }
     if (supabase) {
@@ -323,5 +353,5 @@ export function App() {
       if (error) throw error;
     }
   }} />;
-  return <Landing locale={locale} onLocale={setLocale} loading={loading || signingIn} signedIn={Boolean(user)} canSignIn={Boolean(supabase)} authError={authError} onStart={() => { if (user) { window.location.hash = 'today'; setShowWelcome(false); } else void signIn(); }} onPreview={() => { setPreview(true); setShowWelcome(false); window.location.hash = 'today'; }} />;
+  return <Landing locale={locale} onLocale={setLocale} loading={loading || signingIn} signedIn={Boolean(user)} canSignIn={Boolean(supabase)} authError={authError} onStart={() => { if (user) { window.location.hash = 'today'; setShowWelcome(false); } }} onGoogleSignIn={signInWithGoogle} onEmailSignIn={signInWithEmail} onEmailSignUp={signUpWithEmail} onVerifySignup={verifySignupCode} onRequestPasswordReset={requestPasswordReset} onVerifyRecovery={verifyRecoveryCode} onUpdatePassword={updatePassword} onPreview={() => { setPreview(true); setShowWelcome(false); window.location.hash = 'today'; }} />;
 }

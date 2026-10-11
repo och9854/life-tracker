@@ -20,18 +20,21 @@ Production uses a personal Supabase project. Verify the organization and billing
 ownership, not merely the currently signed-in email. Company accounts and
 resources are excluded.
 
-1. Create a personal Supabase project and enable Google authentication.
-2. In a personally owned Google Cloud project, configure the external OAuth
-   consent screen and a web client. Use the callback URL displayed by Supabase.
-   Add only identity scopes; calendar access is a separate future capability.
-3. In Supabase Auth URL configuration, allow `http://127.0.0.1:4183` for local
+1. Create a personal Supabase project. Enable Email and Password authentication
+   with email confirmation. Google authentication is optional.
+2. In Auth > Email Templates, set the Confirm signup and Reset password
+   templates to include `{{ .Token }}` so the app can show a 6-digit code entry
+   screen. Do not use an email link as the only confirmation path.
+3. Configure custom SMTP before inviting non-team users. The built-in Supabase
+   sender is for testing only and cannot deliver reliable public sign-up email.
+4. In Supabase Auth URL configuration, allow `http://127.0.0.1:4183` for local
    development and the exact HTTPS production origin when deployed. Configure
-   public signups and the production Google consent status before public launch.
-4. Apply each timestamped migration in `supabase/migrations/` to that verified
+   public signups and the production email settings before public launch.
+5. Apply each timestamped migration in `supabase/migrations/` to that verified
    personal project. They use owner-only RLS and optimistic version checks.
-5. Copy `.env.example` to `.env.local`, fill the project URL and **publishable**
+6. Copy `.env.example` to `.env.local`, fill the project URL and **publishable**
    key. Never put a service-role key, database password or OAuth secret here.
-6. Restart Vite. Sign in with two distinct test accounts and confirm record
+7. Restart Vite. Sign in with two distinct test accounts and confirm record
    isolation, reload persistence, and cross-device conflict recovery.
 
 ## Deploy

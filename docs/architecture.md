@@ -10,7 +10,7 @@ back to the entry that prompted them.
 
 ```mermaid
 flowchart LR
-  B[Browser PWA] -->|Google OAuth and session| A[Supabase Auth]
+  B[Browser PWA] -->|Email/password or optional Google OAuth| A[Supabase Auth]
   B -->|owner-scoped diary and tracker data| D[(Supabase Postgres)]
   B -->|saved entry id + session JWT| F[AI Edge Function]
   F -->|verified entry under RLS| D
@@ -21,6 +21,12 @@ flowchart LR
 The static React/Vite PWA runs on the public HTTPS site. The browser contains
 only the Supabase URL and publishable key. Supabase Auth, Row Level Security
 (RLS), and the user's JWT enforce access to personal data.
+
+Email/password accounts use email confirmation. The app sends a confirmation
+or recovery request through Supabase Auth, presents a 6-digit email OTP field,
+and verifies the OTP before granting the session or permitting a password reset.
+The email address is the login identifier; a future public display name is not
+an authorization identifier.
 
 ## Data model
 

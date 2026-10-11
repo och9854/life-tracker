@@ -24,6 +24,20 @@ the personal Supabase SQL Editor because the available scoped CLI token could
 deploy functions but could not link the project for `db push`. Record later
 schema changes in both the timestamped file and the provider migration history.
 
+## Email authentication
+
+Email/password is the primary account path. In the personal project’s Auth
+settings, Email must remain enabled and **Confirm email** must remain on.
+
+The **Confirm signup** and **Reset password** email templates must both include
+`{{ .Token }}`. Life Journal asks the person to enter that six-digit code; it
+does not depend on a magic link opening in the same browser.
+
+Before inviting anyone outside the Supabase team, configure a personal custom
+SMTP provider. The built-in sender is only suitable for limited team testing
+and is not a public delivery service. Keep SMTP credentials in Supabase Auth
+settings only, never in Vercel or a repository environment file.
+
 ## Edge Function deployment
 
 The deployed function is `ai-action-candidates`.
@@ -54,7 +68,9 @@ make an authenticated request through the PWA.
 pnpm build
 ```
 
-Publish the resulting `dist/` directory through the configured Sites project.
+Push the reviewed commit to `main`; the linked personal Vercel project publishes
+the resulting `dist/` directory. If automatic deployment is unavailable, use
+the personal Vercel account rather than a company deployment target.
 After publishing, open the public URL and verify the current version can load,
 sign in, save an entry, and reach the AI suggestion UI. Do not use a company
 hosting, Supabase, or Google account for this release.
