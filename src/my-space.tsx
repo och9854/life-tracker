@@ -37,12 +37,12 @@ export function MySpace({ client, email, locale, onPlans, onReview, onSettings }
       <h2>{korean ? '정리하기' : 'Keep it clear'}</h2>
       <Card className="my-card-list"><CardContent>
         <Button variant="ghost" className="my-row" onClick={onPlans}>
-          <span className="my-row-icon"><Archive aria-hidden="true" /><strong>{korean ? '보관함' : 'Archive'}</strong><small>{korean ? '나중에 다시 꺼낼 액션' : 'Actions you may return to'}</small></span>
+          <span className="my-row-leading"><Archive aria-hidden="true" /><span className="my-row-copy"><strong>{korean ? '보관함' : 'Archive'}</strong><small>{korean ? '나중에 다시 꺼낼 액션' : 'Actions you may return to'}</small></span></span>
           <Badge variant="secondary">{counts.actions}</Badge>
           <ChevronRight aria-hidden="true" />
         </Button>
         <Button variant="ghost" className="my-row" onClick={onPlans}>
-          <span className="my-row-icon"><PauseCircle aria-hidden="true" /><strong>{korean ? '중단한 습관' : 'Paused habits'}</strong><small>{korean ? '필요할 때 다시 시작하세요' : 'Bring them back when ready'}</small></span>
+          <span className="my-row-leading"><PauseCircle aria-hidden="true" /><span className="my-row-copy"><strong>{korean ? '중단한 습관' : 'Paused habits'}</strong><small>{korean ? '필요할 때 다시 시작하세요' : 'Bring them back when ready'}</small></span></span>
           <Badge variant="secondary">{counts.habits}</Badge>
           <ChevronRight aria-hidden="true" />
         </Button>
@@ -52,11 +52,11 @@ export function MySpace({ client, email, locale, onPlans, onReview, onSettings }
       <h2>{korean ? '기록 관리' : 'Your journal'}</h2>
       <Card className="my-card-list"><CardContent>
         <Button variant="ghost" className="my-row" onClick={onReview}>
-          <span className="my-row-icon"><RefreshCw aria-hidden="true" /><strong>{korean ? '주간 회고' : 'Weekly reflection'}</strong><small>{korean ? '나와 했던 약속을 돌아보고 다음 주를 정해요' : 'Look back, then choose a gentle next step'}</small></span>
+          <span className="my-row-leading"><RefreshCw aria-hidden="true" /><span className="my-row-copy"><strong>{korean ? '주간 회고' : 'Weekly reflection'}</strong><small>{korean ? '나와 했던 약속을 돌아보고 다음 주를 정해요' : 'Look back, then choose a gentle next step'}</small></span></span>
           <ChevronRight aria-hidden="true" />
         </Button>
         <Button variant="ghost" className="my-row" onClick={onSettings}>
-          <span className="my-row-icon"><Download aria-hidden="true" /><strong>{korean ? '내보내기와 설정' : 'Export and settings'}</strong><small>{korean ? 'Markdown 내보내기, 언어, 로그아웃' : 'Export, language, and sign out'}</small></span>
+          <span className="my-row-leading"><Download aria-hidden="true" /><span className="my-row-copy"><strong>{korean ? '내보내기와 설정' : 'Export and settings'}</strong><small>{korean ? 'Markdown 내보내기, 언어, 로그아웃' : 'Export, language, and sign out'}</small></span></span>
           <ChevronRight aria-hidden="true" />
         </Button>
       </CardContent></Card>
