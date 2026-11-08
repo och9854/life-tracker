@@ -79,6 +79,36 @@ After publishing, open the public URL and verify the current version can load,
 sign in, save an entry, and reach the AI suggestion UI. Do not use a company
 hosting, Supabase, or Google account for this release.
 
+## Personal MCP endpoint
+
+The planned personal MCP endpoint is:
+
+```text
+https://norzflwojwutofzkwzxu.supabase.co/functions/v1/mcp
+```
+
+It intentionally uses `--no-verify-jwt` at the gateway because MCP clients
+must be able to retrieve OAuth protected-resource metadata before they have a
+token. The function itself then verifies the OAuth user token and uses an
+RLS-scoped client.
+
+Before its first deployment in the personal project:
+
+1. In **Authentication → OAuth Server**, enable OAuth 2.1 and set the
+   authorization path to `/oauth/consent`.
+2. Change the project signing key to RS256 or ES256.
+3. Leave dynamic client registration disabled for the personal-only launch.
+4. Deploy the Vercel site so `/oauth/consent` can show the approval screen.
+5. Deploy the function with the personal CLI token:
+
+```sh
+supabase --workdir . functions deploy mcp --remote=norzflwojwutofzkwzxu --use-api --no-verify-jwt
+```
+
+Connect an MCP-capable chat client to the endpoint above. The client will open
+Life Journal for sign-in and approval; do not paste an access token, database
+password, or service-role key into the chat client.
+
 ## Key rotation
 
 If a Gemini key may have been exposed:

@@ -11,6 +11,7 @@ import { MySpace } from './my-space';
 import { Landing } from './landing';
 import { ThemeSelect, initializeTheme } from './theme';
 import { WeeklyReview } from './weekly-review';
+import { OAuthConsent } from './oauth-consent';
 import { actionSuggestionResponseSchema } from './ai';
 import type { ActionSuggestion } from './ai';
 import { PrimitiveShowcase } from '@/components/ui/showcase';
@@ -346,6 +347,7 @@ export function App() {
     const { error } = await supabase.auth.updateUser({ password });
     return error?.message ?? null;
   }
+  if (window.location.pathname === '/oauth/consent' && user && supabase) return <OAuthConsent client={supabase} locale={locale} />;
   if (!showWelcome && repository && (preview || user)) return <Journal key={preview ? 'preview' : user?.id} locale={locale} onLocale={setLocale} userId={preview ? 'preview' : user?.id ?? ''} email={user?.email ?? ''} preview={preview} repository={repository} onExit={async () => {
     if (preview) { setPreview(false); return; }
     if (supabase) {

@@ -16,6 +16,8 @@ flowchart LR
   F -->|verified entry under RLS| D
   F -->|one selected entry only| G[Gemini API]
   F -->|candidate cache and rate count| D
+  C[Chatbot or MCP client] -->|OAuth 2.1 user token| M[MCP Edge Function]
+  M -->|RLS-scoped tools| D
 ```
 
 The static React/Vite PWA runs on the public HTTPS site. The browser contains
@@ -64,5 +66,7 @@ queries. It does not use that access to read arbitrary diary content.
 - The first AI feature uses a single selected entry. It does not need vector
   search. A future cross-entry review can start with date-range SQL queries;
   semantic retrieval should be introduced only when that limitation is observed.
-- Email reminders, push notifications, chat, and MCP are product extensions,
-  not implicit capabilities of the current app.
+- The repository includes an MCP Edge Function and consent screen. It becomes
+  available only after the personal Supabase OAuth settings are enabled and the
+  function is deployed. It uses the existing user identity and RLS rather than
+  a shared database key or a service-role key held by a chatbot.

@@ -329,6 +329,20 @@
 .my-row-copy small { display: block; color: var(--muted-foreground); font-size: .82rem; line-height: 1.45; overflow-wrap: anywhere; }
 .my-row > svg { width: 18px; height: 18px; color: var(--muted-foreground); }
 
+.oauth-consent-page { display: grid; min-height: 100dvh; place-items: center; background: var(--background); padding: var(--space-5); color: var(--foreground); }
+.oauth-consent-card { display: grid; width: min(100%, 480px); gap: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-sheet); background: var(--card); padding: var(--space-6); box-shadow: var(--shadow-paper); }
+.oauth-consent-kicker { color: var(--primary); font-size: .72rem; font-weight: 700; letter-spacing: .12em; }
+.oauth-consent-card h1 { font-family: var(--font-serif); font-size: clamp(2rem, 6vw, 2.8rem); font-weight: 450; line-height: 1.15; }
+.oauth-consent-card > p:not(.oauth-consent-kicker) { color: var(--muted-foreground); line-height: 1.7; }
+.oauth-client-details { display: flex; min-width: 0; align-items: center; gap: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--muted); padding: var(--space-3); }
+.oauth-client-details img { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 10px; object-fit: cover; }
+.oauth-client-details > div { display: grid; min-width: 0; gap: 2px; }
+.oauth-client-details span { overflow: hidden; color: var(--muted-foreground); font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+.oauth-scope-list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.oauth-scope-list li { border-radius: var(--radius-pill); background: var(--secondary); padding: 5px var(--space-3); color: var(--secondary-foreground); font-size: .78rem; }
+.oauth-consent-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.oauth-consent-error { color: var(--destructive) !important; }
+
 .settings-dialog[data-slot="dialog-content"] { position: fixed; top: auto !important; bottom: 0; left: 50% !important; display: grid; width: min(100%, 560px) !important; max-height: min(82dvh, 760px); gap: var(--space-5); overflow: auto; transform: translateX(-50%) !important; border: 1px solid var(--border) !important; border-bottom: 0 !important; border-radius: var(--radius-sheet) var(--radius-sheet) 0 0 !important; background: var(--card) !important; padding: var(--space-6) max(var(--space-5), env(safe-area-inset-left)) calc(var(--space-6) + env(safe-area-inset-bottom)) !important; box-shadow: var(--shadow-sheet) !important; }
 .settings-dialog[data-slot="dialog-content"]:focus-visible { outline: none; }
 [data-slot="dialog-overlay"] { background: rgb(18 24 20 / .42) !important; backdrop-filter: blur(3px); }

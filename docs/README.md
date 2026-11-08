@@ -8,6 +8,7 @@ It is written so the service can be changed without relying on chat history.
 | [Architecture](architecture.md) | System boundaries, data flow, and data ownership |
 | [Operations](operations.md) | Safe deployment, secrets, and validation |
 | [Project management](project-management.md) | Where active work, priorities, and decisions are tracked |
+| [Agent integration](agent-integration.md) | MCP and API boundary for chatbot capture |
 | [Decision records](decisions/) | Durable choices and their trade-offs |
 
 Decision records are append-only. When a decision changes, add a new record that
