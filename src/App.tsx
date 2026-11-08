@@ -310,7 +310,8 @@ export function App() {
     if (!supabase) return;
     setSigningIn(true); setAuthError(false);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+      const redirectTo = window.location.pathname === '/oauth/consent' ? window.location.href : window.location.origin;
+      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
       if (error) { setAuthError(true); setSigningIn(false); }
     } catch (error) {
       if (!(error instanceof Error)) throw error;

@@ -36,10 +36,12 @@ asking a person to paste a Supabase access token, a database password, or a
 service-role key into a chatbot.
 
 Before launch, enable OAuth 2.1 in the personal Supabase project, move JWT
-signing to RS256 or ES256, and build a consent page at `/oauth/consent`. Show
-the client name and requested access before approval, and provide a connected-
-client revocation screen in **내 공간**. Dynamic client registration should
-remain off until the approved client list and revocation flow have been tested.
+signing to RS256 or ES256, and deploy the consent page at `/oauth/consent`.
+Show the client name and requested access before approval. Enable dynamic client
+registration for the personal MCP rollout so compatible chat clients can
+connect; approval is still required before any client can read or write data.
+Review registered clients regularly, and add a connected-client revocation
+screen in **내 공간** before inviting other people to use the service.
 
 Supabase's OAuth server is designed for this use case: its OAuth access tokens
 carry the user identity and continue to enforce RLS. Its MCP middleware exposes

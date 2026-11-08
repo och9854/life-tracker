@@ -97,7 +97,9 @@ Before its first deployment in the personal project:
 1. In **Authentication → OAuth Server**, enable OAuth 2.1 and set the
    authorization path to `/oauth/consent`.
 2. Change the project signing key to RS256 or ES256.
-3. Leave dynamic client registration disabled for the personal-only launch.
+3. Enable dynamic client registration for the personal-only launch. Each client
+   still requires the approval screen before it receives a user token; review
+   registered clients in Supabase before inviting anyone else.
 4. Deploy the Vercel site so `/oauth/consent` can show the approval screen.
 5. Deploy the function with the personal CLI token:
 
